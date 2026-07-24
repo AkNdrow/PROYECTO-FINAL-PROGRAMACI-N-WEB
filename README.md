@@ -32,4 +32,4 @@ Los estudiantes y profesionales técnicos suelen utilizar múltiples herramienta
 ##  Enlaces del Proyecto
 
 * **Repositorio en GitHub:** [https://github.com/AkNdrow/PROYECTO-FINAL-PROGRAMACI-N-WEB]
-* **Tablero de GitHub Projects:** []
+* **Tablero de GitHub Projects:** [https://github.com/users/moisep24/projects/1]
