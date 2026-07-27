@@ -10,18 +10,57 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     password: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulación de registro por ahora
-    onRegisterSuccess();
+
+    const nextErrors = {};
+
+    if (!formData.fullName.trim()) {
+      nextErrors.fullName = 'El nombre completo es obligatorio.';
+    }
+
+    if (!formData.birthDate) {
+      nextErrors.birthDate = 'La fecha de nacimiento es obligatoria.';
+    }
+
+    if (!formData.email.trim()) {
+      nextErrors.email = 'Por favor, ingresa un correo electrónico válido.';
+    }
+
+    if (!formData.password) {
+      nextErrors.password = 'Por favor, ingresa una contraseña.';
+    } else if (formData.password.length < 6) {
+      nextErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
+    }
+
+    if (!formData.confirmPassword) {
+      nextErrors.confirmPassword = 'Por favor, confirma tu contraseña.';
+    } else if (formData.password !== formData.confirmPassword) {
+      nextErrors.confirmPassword = 'Las contraseñas no coinciden.';
+    }
+
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length === 0) {
+      onRegisterSuccess();
+    }
   };
 
   return (
@@ -42,7 +81,7 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
           <h2>Crea tu cuenta</h2>
           <p className="subtitle">Introduce tus datos</p>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="input-group">
               <label>Nombre Completo:</label>
               <input
@@ -50,8 +89,10 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
+                className={errors.fullName ? 'error-input' : ''}
                 required
               />
+              {errors.fullName && <span className="error-message">{errors.fullName}</span>}
             </div>
 
             <div className="input-group">
@@ -61,8 +102,10 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
                 name="birthDate"
                 value={formData.birthDate}
                 onChange={handleChange}
+                className={errors.birthDate ? 'error-input' : ''}
                 required
               />
+              {errors.birthDate && <span className="error-message">{errors.birthDate}</span>}
             </div>
 
             <div className="input-group">
@@ -72,8 +115,10 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                className={errors.email ? 'error-input' : ''}
                 required
               />
+              {errors.email && <span className="error-message">{errors.email}</span>}
             </div>
 
             <div className="input-group">
@@ -93,8 +138,10 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                className={errors.password ? 'error-input' : ''}
                 required
               />
+              {errors.password && <span className="error-message">{errors.password}</span>}
             </div>
 
             <div className="input-group">
@@ -104,8 +151,10 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                className={errors.confirmPassword ? 'error-input' : ''}
                 required
               />
+              {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
             </div>
 
             <button type="submit" className="btn-primary">
