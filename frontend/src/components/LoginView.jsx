@@ -64,7 +64,13 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
           }),
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (jsonErr) {
+          throw new Error('El servidor backend devolvió una respuesta inesperada.');
+        }
 
         if (!response.ok) {
           if (data.errors) {
