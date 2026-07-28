@@ -1,0 +1,76 @@
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: 72px 1fr;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+.sidebar-container {
+  grid-row: 1 / 3;
+  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.15);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sidebar-brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sidebar-link {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.sidebar-link.active,
+.sidebar-link:hover {
+  background-color: rgba(56, 189, 248, 0.14);
+  color: #f8fafc;
+}
+
+.navbar-container {
+  background-color: #111827;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-title {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.navbar-action {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.content-container {
+  padding: 1.5rem;
+  overflow: auto;
+  background-color: #020617;
+}

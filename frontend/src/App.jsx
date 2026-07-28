@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MarkdownEditorView from './components/MarkdownEditorView';
 import LoginView from './components/LoginView';
 import RegisterView from './components/RegisterView';
+import DashboardLayout from './components/DashboardLayout';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('login');
@@ -25,6 +26,8 @@ export default function App() {
   }
 
   return (
-    <MarkdownEditorView onLogout={() => setCurrentView('login')} />
+    <DashboardLayout onLogout={() => setCurrentView('login')}>
+      <MarkdownEditorView />
+    </DashboardLayout>
   );
 }
