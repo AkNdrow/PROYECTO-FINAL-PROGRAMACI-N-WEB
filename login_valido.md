@@ -83,6 +83,22 @@ El cliente React almacena el token en `localStorage` (`clevernote_token`) e inic
 
 ---
 
+## 👤 3. Visualización Dinámica de las Credenciales del Usuario
+
+Anteriormente, el componente `<Navbar>` en el Dashboard mostraba el nombre estático de muestra `"Moisés"`.
+
+Se refactorizó `DashboardLayout.jsx` para consumir dinámicamente el hook `useAuth()` de la aplicación:
+```javascript
+const { user } = useAuth();
+const displayName = typeof user === 'object' && user !== null
+  ? (user.name || user.fullName || (user.email ? user.email.split('@')[0] : 'Usuario'))
+  : (typeof user === 'string' && user ? user : 'Usuario');
+```
+
+**Resultado**:
+- La esquina superior derecha (Navbar) obtiene automáticamente el nombre del usuario autenticado (API o LocalStorage).
+- El icono del avatar en el Navbar extrae la inicial en mayúscula de dicho usuario de forma dinámica (`displayName.charAt(0)`).
+
 ## 🌐 3. Resiliencia y Modo Offline / Local
 
 En caso de que el entorno cliente se encuentre sin conexión a Internet o el backend esté temporalmente inaccesible durante pruebas locales:
