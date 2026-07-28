@@ -4,18 +4,51 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import MarkdownEditorView from './MarkdownEditorView';
 import DataTable from './DataTable';
-import LoadingSpinner from './LoadingSpinner';
 import AlertMessage from './AlertMessage';
 import Pagination from './Pagination';
 import SearchBar from './SearchBar';
+import LoadingSpinner from './LoadingSpinner';
 import Modal from './Modal';
 import { useAuth } from '../context/AuthContext';
 
-export default function DashboardLayout({ onLogout }) {
+
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState('editor');
   const [isLoading, setIsLoading] = useState(false);
+function parseMarkdownToHtml(mdText) {
+  if (!mdText) return '';
+
+  let html = mdText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+  html = html.replace(/^&gt;\s?(.*$)/gim, '<blockquote>$1</blockquote>');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+  html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+  html = html
+    .split('\n\n')
+    .map((paragraph) => {
+      if (paragraph.trim().startsWith('<h') || paragraph.trim().startsWith('<block') || paragraph.trim().startsWith('<ul')) {
+        return paragraph;
+      }
+      return `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`;
+    })
+    .join('');
+
+  return html;
+}
+
+export default function DashboardLayout({ onLogout, initialSection = 'dashboard' }) {
+  const [activeSection, setActiveSection] = useState(initialSection);
   const [showAlert, setShowAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalVariant, setModalVariant] = useState('create');
 
@@ -37,7 +70,6 @@ export default function DashboardLayout({ onLogout }) {
   }
 
   const handleSave = () => {
-    console.log('Clic en Guardar');
     setShowAlert(true);
   };
 
@@ -45,47 +77,124 @@ export default function DashboardLayout({ onLogout }) {
     setShowAlert(false);
   };
 
+  const openCreateModal = () => {
+    setModalVariant('create');
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = () => {
+    setModalVariant('delete');
+    setIsModalOpen(true);
+  };
+
+  const showTemporaryLoader = () => {
+    setIsLoading(true);
+    window.setTimeout(() => setIsLoading(false), 1200);
+  };
+
+  const sectionTitles = {
+    dashboard: 'Inicio',
+    storage: 'Almacenes',
+    completed: 'Tareas completadas',
+    editor: 'Editor'
+  };
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'storage':
+        return (
+          <section className="dashboard-home">
+            <div className="welcome-card storage-card">
+              <p className="welcome-eyebrow">Almacenes</p>
+              <h2>Centro de recursos del proyecto</h2>
+              <p>Organiza documentos, entregables y referencias para el desarrollo web en un solo lugar.</p>
+            </div>
+          </section>
+        );
+      case 'completed':
+        return (
+          <section className="completed-section">
+            <div className="section-header">
+              <div>
+                <p className="welcome-eyebrow">Resumen</p>
+                <h2>Entregables completados</h2>
+              </div>
+            </div>
+            <SearchBar />
+            <DataTable />
+            <Pagination />
+          </section>
+        );
+      case 'editor':
+        return (
+          <section className="editor-actions-section">
+            <div className="demo-actions">
+              <button type="button" className="demo-toggle" onClick={showTemporaryLoader}>
+                {isLoading ? 'Ocultar carga' : 'Mostrar carga'}
+              </button>
+              <button type="button" className="demo-toggle" onClick={openCreateModal}>
+                Abrir crear/editar
+              </button>
+              <button type="button" className="demo-toggle danger" onClick={openDeleteModal}>
+                Abrir eliminar
+              </button>
+            </div>
+
+            {isLoading ? <LoadingSpinner text="Cargando contenido..." /> : null}
+            <MarkdownEditorView onSave={handleSave} />
+          </section>
+        );
+      case 'dashboard':
+      default:
+        return (
+          <section className="dashboard-home">
+            <div className="welcome-card">
+              <p className="welcome-eyebrow">Bienvenido</p>
+              <h1>CleverNote - Tablero de Proyectos</h1>
+              <div className="project-meta">
+                <span>Nombre del proyecto: Desarrollo web</span>
+                <span>Estado: 5 Tareas pendientes</span>
+                <span>Colaboradores: Andrés, Moisés</span>
+              </div>
+            </div>
+
+            <div className="markdown-viewer-card">
+              <h2>Descripción general del proyecto</h2>
+              <div
+                className="markdown-viewer__body"
+                dangerouslySetInnerHTML={{
+                  __html: parseMarkdownToHtml(`# Instrucciones iniciales
+
+- Revisa las tareas pendientes del tablero.
+- Actualiza el avance del proyecto cada mañana.
+- Usa el editor para documentar decisiones y acuerdos.
+
+> Mantén la comunicación clara con el equipo.
+
+## Objetivo
+El proyecto busca consolidar una experiencia visual limpia y colaborativa para el desarrollo web.`)
+                }}
+              />
+            </div>
+          </section>
+        );
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
 
       <header className="navbar-container">
+<<<<<<< HEAD
         <Navbar userName={displayName} title="CleverNote / Dashboard" onLogout={onLogout} />
+=======
+        <Navbar userName="Moisés" title={`CleverNote / ${sectionTitles[activeSection] || 'Inicio'}`} onLogout={onLogout} />
+>>>>>>> c21a946 (  vistas del dashboard)
       </header>
 
       <main className="content-container">
-        <button
-          type="button"
-          className="demo-toggle"
-          onClick={() => setIsLoading((prev) => !prev)}
-        >
-          {isLoading ? 'Ocultar carga' : 'Mostrar carga'}
-        </button>
-
-        <div className="demo-actions">
-          <button
-            type="button"
-            className="demo-toggle"
-            onClick={() => {
-              setModalVariant('create');
-              setIsModalOpen(true);
-            }}
-          >
-            Abrir crear/editar
-          </button>
-          <button
-            type="button"
-            className="demo-toggle danger"
-            onClick={() => {
-              setModalVariant('delete');
-              setIsModalOpen(true);
-            }}
-          >
-            Abrir eliminar
-          </button>
-        </div>
-
-        {isLoading ? <LoadingSpinner text="Cargando contenido..." /> : null}
+        {renderContent()}
 
         <Modal
           isOpen={isModalOpen}
@@ -122,7 +231,7 @@ export default function DashboardLayout({ onLogout }) {
                 <button type="button" className="modal-button secondary" onClick={() => setIsModalOpen(false)}>
                   Cancelar
                 </button>
-                <button type="button" className="modal-button primary" onClick={() => setShowAlert(true)}>
+                <button type="button" className="modal-button primary">
                   Guardar
                 </button>
               </div>
@@ -130,19 +239,9 @@ export default function DashboardLayout({ onLogout }) {
           )}
         </Modal>
 
-        {activeSection === 'completed' ? (
-          <div>
-            <SearchBar />
-            <DataTable />
-            <Pagination />
-          </div>
-        ) : (
-          <MarkdownEditorView onSave={handleSave} />
-        )}
-
         {showAlert && (
           <AlertMessage
-            message="No se pudo guardar el documento. Intenta de nuevo."
+            message="Documento guardado correctamente."
             onClose={closeAlert}
           />
         )}

@@ -3,8 +3,10 @@ import './Sidebar.css';
 
 export default function Sidebar({ activeSection, onSelectSection }) {
   const sections = [
-    { key: 'editor', label: 'Dashboard / Editor' },
-    { key: 'completed', label: 'Tareas completadas' }
+    { key: 'dashboard', label: 'Dashboard' },
+    { key: 'storage', label: 'Almacenes' },
+    { key: 'completed', label: 'Tareas completadas' },
+    { key: 'editor', label: 'Abrir Editor' }
   ];
 
   return (
