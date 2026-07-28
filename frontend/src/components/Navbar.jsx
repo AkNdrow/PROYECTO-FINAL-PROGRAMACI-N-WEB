@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Navbar.css';
 
-export default function Navbar({ userName = 'Usuario', title = 'CleverNote / Dashboard', onLogout }) {
+export default function Navbar({ userName = 'Usuario', title = 'CleverNote / Dashboard', onLogout, onProfileSelect, onSettingsSelect }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -32,16 +32,33 @@ export default function Navbar({ userName = 'Usuario', title = 'CleverNote / Das
 
           {isOpen ? (
             <div className="dropdown-menu">
-              <button type="button" className="dropdown-item">
+              <button
+                type="button"
+                className="dropdown-item"
+                onClick={() => {
+                  setIsOpen(false);
+                  onProfileSelect?.();
+                }}
+              >
                 Perfil
               </button>
-              <button type="button" className="dropdown-item">
+              <button
+                type="button"
+                className="dropdown-item"
+                onClick={() => {
+                  setIsOpen(false);
+                  onSettingsSelect?.();
+                }}
+              >
                 Ajustes
               </button>
               <button
                 type="button"
                 className="dropdown-item danger"
-                onClick={onLogout}
+                onClick={() => {
+                  setIsOpen(false);
+                  onLogout?.();
+                }}
               >
                 Cerrar sesión
               </button>

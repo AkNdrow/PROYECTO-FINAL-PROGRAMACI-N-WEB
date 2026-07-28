@@ -9,6 +9,8 @@ import Pagination from './Pagination';
 import SearchBar from './SearchBar';
 import LoadingSpinner from './LoadingSpinner';
 import Modal from './Modal';
+import ProfileView from './ProfileView';
+import SettingsView from './SettingsView';
 import { useAuth } from '../context/AuthContext';
 
 function parseMarkdownToHtml(mdText) {
@@ -78,11 +80,17 @@ export default function DashboardLayout({ onLogout, initialSection = 'dashboard'
     dashboard: 'Inicio',
     storage: 'Almacenes',
     completed: 'Tareas completadas',
-    editor: 'Editor'
+    editor: 'Editor',
+    profile: 'Perfil',
+    settings: 'Ajustes'
   };
 
   const renderContent = () => {
     switch (activeSection) {
+      case 'profile':
+        return <ProfileView user={user} />;
+      case 'settings':
+        return <SettingsView />;
       case 'storage':
         return (
           <section className="dashboard-home">
@@ -168,7 +176,13 @@ El proyecto busca consolidar una experiencia visual limpia y colaborativa para e
       <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
 
       <header className="navbar-container">
-        <Navbar userName={displayName} title={`CleverNote / ${sectionTitles[activeSection] || 'Inicio'}`} onLogout={() => { logout(); onLogout?.(); }} />
+        <Navbar
+          userName={displayName}
+          title={`CleverNote / ${sectionTitles[activeSection] || 'Inicio'}`}
+          onLogout={() => { logout(); onLogout?.(); }}
+          onProfileSelect={() => setActiveSection('profile')}
+          onSettingsSelect={() => setActiveSection('settings')}
+        />
       </header>
 
       <main className="content-container">
