@@ -10,14 +10,18 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Registro de usuario nuevo
+     * Registro de usuario nuevo con validación de formato seguro
      */
     public function register(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/'],
+        ], [
+            'password.regex' => 'La contraseña debe tener al menos 8 caracteres, incluir al menos una letra mayúscula, una minúscula y un número.',
+            'email.unique' => 'El correo electrónico ya se encuentra registrado.',
+            'email.email' => 'El correo electrónico debe ser una dirección válida.',
         ]);
 
         $user = User::create([
@@ -26,27 +30,43 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
             'message' => 'Usuario registrado exitosamente',
             'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
         ], 201);
     }
 
     /**
-     * Inicio de sesión y emisión de token
+     * Inicio de sesión con verificación previa de existencia del usuario
      */
     public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+        ], [
+            'email.required' => 'Por favor, ingresa tu correo electrónico.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'password.required' => 'Por favor, ingresa tu contraseña.',
         ]);
 
+        // 1. Detectar primero si el usuario existe
         $user = User::where('email', $request->email)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! $user) {
             throw ValidationException::withMessages([
-                'email' => ['Las credenciales proporcionadas son incorrectas.'],
+                'email' => ['El usuario no se encuentra registrado. Regístrate primero.'],
+            ]);
+        }
+
+        // 2. Validar que la contraseña sea correcta
+        if (! Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => ['La contraseña ingresada es incorrecta.'],
             ]);
         }
 
@@ -55,8 +75,10 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
+            'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer',
         ]);
     }
 }
+
