@@ -19,9 +19,22 @@ export default function DashboardLayout({ onLogout }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalVariant, setModalVariant] = useState('create');
 
-  const displayName = typeof user === 'object' && user !== null
-    ? (user.name || user.fullName || (user.email ? user.email.split('@')[0] : 'Usuario'))
-    : (typeof user === 'string' && user ? user : 'Usuario');
+  let displayName = 'Usuario';
+  if (typeof user === 'object' && user !== null) {
+    if (user.name) displayName = user.name;
+    else if (user.fullName) displayName = user.fullName;
+    else if (user.email) {
+      const uname = user.email.split('@')[0];
+      displayName = uname.charAt(0).toUpperCase() + uname.slice(1);
+    }
+  } else if (typeof user === 'string' && user.length > 0) {
+    if (user.includes('@')) {
+      const uname = user.split('@')[0];
+      displayName = uname.charAt(0).toUpperCase() + uname.slice(1);
+    } else {
+      displayName = user;
+    }
+  }
 
   const handleSave = () => {
     console.log('Clic en Guardar');
