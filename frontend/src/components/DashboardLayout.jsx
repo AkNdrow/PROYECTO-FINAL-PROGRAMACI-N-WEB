@@ -1,5 +1,6 @@
 import React from 'react';
 import './DashboardLayout.css';
+import Navbar from './Navbar';
 
 export default function DashboardLayout({ children, onLogout }) {
   return (
@@ -20,12 +21,7 @@ export default function DashboardLayout({ children, onLogout }) {
       </aside>
 
       <header className="navbar-container">
-        <span className="navbar-title">Panel de edición</span>
-        {onLogout ? (
-          <button type="button" className="navbar-action" onClick={onLogout}>
-            Cerrar sesión
-          </button>
-        ) : null}
+        <Navbar userName="Moisés" title="CleverNote / Dashboard" />
       </header>
 
       <main className="content-container">{children}</main>
