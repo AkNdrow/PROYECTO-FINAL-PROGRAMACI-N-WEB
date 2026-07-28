@@ -49,7 +49,7 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
 
     if (Object.keys(nextErrors).length === 0) {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000/api' : '/api');
 
       try {
         const response = await fetch(`${apiUrl}/login`, {
