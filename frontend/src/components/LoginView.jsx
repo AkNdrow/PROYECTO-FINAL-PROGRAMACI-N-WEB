@@ -37,10 +37,12 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
       nextErrors.email = 'Ingresa un correo electrónico válido (ejemplo@dominio.com).';
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
     if (!formData.password) {
       nextErrors.password = 'Por favor, ingresa tu contraseña.';
-    } else if (formData.password.length < 6) {
-      nextErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
+    } else if (!passwordRegex.test(formData.password)) {
+      nextErrors.password = 'La contraseña debe tener al menos 8 caracteres, incluir al menos una letra mayúscula, una minúscula y un número.';
     }
 
     setErrors(nextErrors);
@@ -65,23 +67,45 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
         const data = await response.json();
 
         if (!response.ok) {
+          if (data.errors) {
+            const backendErrors = {};
+            if (data.errors.email) backendErrors.email = data.errors.email[0];
+            if (data.errors.password) backendErrors.password = data.errors.password[0];
+            setErrors(backendErrors);
+            return;
+          }
           throw new Error(data.message || 'Credenciales incorrectas');
         }
 
-        if (data.token) {
-          localStorage.setItem('clevernote_token', data.token);
-        }
-        if (data.user) {
-          localStorage.setItem('clevernote_user', JSON.stringify(data.user));
-        }
+        const token = data.access_token || data.token || 'auth_token_' + Date.now();
+        const userObj = data.user || { email: formData.email.trim() };
 
-        onLogin();
+        localStorage.setItem('clevernote_token', token);
+        localStorage.setItem('clevernote_user', JSON.stringify(userObj));
+
+        onLogin(userObj);
       } catch (err) {
-        // Fallback local: Si la API no está alcanzable (offline/desarrollo local), se admite la autenticación local simulada
+        // Fallback local seguro: Si la API no está alcanzable, verificar que el usuario se haya registrado previamente en almacenamiento local
         if (err.name === 'TypeError' || err.message.includes('Failed to fetch')) {
-          console.warn('API backend desconectada. Usando autenticación local simulada.');
-          localStorage.setItem('clevernote_user', JSON.stringify({ email: formData.email.trim() }));
-          onLogin();
+          console.warn('API backend desconectada. Verificando usuario en almacenamiento local.');
+          const registeredUsers = JSON.parse(localStorage.getItem('clevernote_registered_users') || '[]');
+          const inputEmail = formData.email.trim().toLowerCase();
+          const userFound = registeredUsers.find(u => u.email.toLowerCase() === inputEmail);
+
+          if (!userFound) {
+            setErrors({ email: 'El usuario no se encuentra registrado. Regístrate primero.' });
+            return;
+          }
+
+          if (userFound.password !== formData.password) {
+            setErrors({ password: 'La contraseña ingresada es incorrecta.' });
+            return;
+          }
+
+          const userObj = { name: userFound.fullName || userFound.name || 'Usuario', email: userFound.email };
+          localStorage.setItem('clevernote_user', JSON.stringify(userObj));
+          localStorage.setItem('clevernote_token', 'local_offline_token_' + Date.now());
+          onLogin(userObj);
         } else {
           setErrors({ general: err.message || 'Error al iniciar sesión' });
         }

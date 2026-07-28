@@ -49,10 +49,12 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
       nextErrors.email = 'Ingresa un correo electrónico válido (ejemplo@dominio.com).';
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
     if (!formData.password) {
       nextErrors.password = 'Por favor, ingresa una contraseña.';
-    } else if (formData.password.length < 6) {
-      nextErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
+    } else if (!passwordRegex.test(formData.password)) {
+      nextErrors.password = 'La contraseña debe tener al menos 8 caracteres, incluir al menos una letra mayúscula, una minúscula y un número.';
     }
 
     if (!formData.confirmPassword) {
@@ -67,6 +69,25 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
       setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
+      // Función auxiliar para registrar en base de datos local (localStorage)
+      const saveUserLocally = () => {
+        const registeredUsers = JSON.parse(localStorage.getItem('clevernote_registered_users') || '[]');
+        const newUser = {
+          fullName: formData.fullName.trim(),
+          name: formData.fullName.trim(),
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password
+        };
+        const existingIndex = registeredUsers.findIndex(u => u.email === newUser.email);
+        if (existingIndex >= 0) {
+          registeredUsers[existingIndex] = newUser;
+        } else {
+          registeredUsers.push(newUser);
+        }
+        localStorage.setItem('clevernote_registered_users', JSON.stringify(registeredUsers));
+        localStorage.setItem('clevernote_user', JSON.stringify(newUser));
+      };
+
       try {
         const response = await fetch(`${apiUrl}/register`, {
           method: 'POST',
@@ -75,6 +96,7 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
             'Accept': 'application/json',
           },
           body: JSON.stringify({
+            name: formData.fullName.trim(),
             fullName: formData.fullName.trim(),
             birthDate: formData.birthDate,
             email: formData.email.trim(),
@@ -90,26 +112,28 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
             const backendErrors = {};
             if (data.errors.email) backendErrors.email = data.errors.email[0];
             if (data.errors.password) backendErrors.password = data.errors.password[0];
-            if (data.errors.fullName) backendErrors.fullName = data.errors.fullName[0];
+            if (data.errors.name || data.errors.fullName) backendErrors.fullName = (data.errors.name || data.errors.fullName)[0];
             setErrors(backendErrors);
             return;
           }
           throw new Error(data.message || 'Error al registrar usuario');
         }
 
+        saveUserLocally();
+
+        if (data.access_token || data.token) {
+          localStorage.setItem('clevernote_token', data.access_token || data.token);
+        }
         if (data.user) {
           localStorage.setItem('clevernote_user', JSON.stringify(data.user));
         }
 
-        onRegisterSuccess();
+        onRegisterSuccess(data.user || { fullName: formData.fullName.trim(), email: formData.email.trim() });
       } catch (err) {
         if (err.name === 'TypeError' || err.message.includes('Failed to fetch')) {
           console.warn('API backend desconectada. Registrando usuario en modo local simulado.');
-          localStorage.setItem('clevernote_user', JSON.stringify({
-            fullName: formData.fullName.trim(),
-            email: formData.email.trim()
-          }));
-          onRegisterSuccess();
+          saveUserLocally();
+          onRegisterSuccess({ fullName: formData.fullName.trim(), email: formData.email.trim() });
         } else {
           setErrors({ general: err.message || 'Error al crear la cuenta' });
         }
