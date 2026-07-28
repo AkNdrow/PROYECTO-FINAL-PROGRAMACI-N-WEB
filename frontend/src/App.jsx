@@ -4,9 +4,12 @@ import MarkdownEditorView from './components/MarkdownEditorView';
 import LoginView from './components/LoginView';
 import RegisterView from './components/RegisterView';
 import DashboardLayout from './components/DashboardLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-export default function App() {
+function AppRoutes() {
   const navigate = useNavigate();
+  const { login, logout } = useAuth();
 
   return (
     <Routes>
@@ -14,7 +17,10 @@ export default function App() {
         path="/login"
         element={
           <LoginView
-            onLogin={() => navigate('/dashboard')}
+            onLogin={(userData) => {
+              login(userData || { email: 'usuario@demo.com' });
+              navigate('/dashboard');
+            }}
             onNavigateToRegister={() => navigate('/register')}
           />
         }
@@ -24,27 +30,42 @@ export default function App() {
         element={
           <RegisterView
             onNavigateToLogin={() => navigate('/login')}
-            onRegisterSuccess={() => navigate('/dashboard')}
+            onRegisterSuccess={(userData) => {
+              login(userData || { email: 'usuario@demo.com' });
+              navigate('/dashboard');
+            }}
           />
         }
       />
       <Route
         path="/dashboard"
         element={
-          <DashboardLayout onLogout={() => navigate('/login')}>
-            <MarkdownEditorView />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout onLogout={() => { logout(); navigate('/login'); }}>
+              <MarkdownEditorView />
+            </DashboardLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/editor/:id"
         element={
-          <DashboardLayout onLogout={() => navigate('/login')}>
-            <MarkdownEditorView />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout onLogout={() => { logout(); navigate('/login'); }}>
+              <MarkdownEditorView />
+            </DashboardLayout>
+          </ProtectedRoute>
         }
       />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }

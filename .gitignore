@@ -1,4 +1,8 @@
-# Logs
+# ==========================================
+# UNIFIED MONOREPO GITIGNORE (CleverNote)
+# ==========================================
+
+# Logs & Temporary files
 logs
 *.log
 npm-debug.log*
@@ -7,28 +11,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Node modules & Build output (Frontend)
-node_modules/
-frontend/node_modules/
-dist/
-frontend/dist/
-dist-ssr/
-*.local
-
-# Environment & Config
-.env
-.env.*
-
-# Editor directories
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# OS generated files
+# OS & System Generated
 .DS_Store
 .DS_Store?
 ._*
@@ -37,11 +20,48 @@ dist-ssr/
 ehthumbs.db
 Thumbs.db
 
-# Laravel Backend
+# IDE & Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment Variables & Keys
+.env
+.env.*
+!.env.example
+*.key
+
+# ------------------------------------------
+# FRONTEND (React + Vite)
+# ------------------------------------------
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+dist-ssr/
+frontend/dist-ssr/
+*.local
+
+# ------------------------------------------
+# BACKEND (Laravel API)
+# ------------------------------------------
 backend/vendor/
 backend/.env
+backend/.env.backup
+backend/.env.production
 backend/storage/*.key
 backend/storage/oauth-*.key
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/testing/*
+backend/storage/framework/views/*
 backend/public/storage
 backend/public/hot
 backend/public/build
+backend/node_modules/
+backend/database/*.sqlite
+backend/database/*.sqlite-journal
