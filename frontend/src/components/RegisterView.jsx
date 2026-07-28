@@ -50,16 +50,18 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    const cleanPassword = (formData.password || '').trim();
+    const cleanConfirmPassword = (formData.confirmPassword || '').trim();
 
     if (!formData.password) {
       nextErrors.password = 'Por favor, ingresa una contraseña.';
-    } else if (!passwordRegex.test(formData.password)) {
+    } else if (!passwordRegex.test(cleanPassword)) {
       nextErrors.password = 'La contraseña debe tener al menos 8 caracteres, incluir al menos una letra mayúscula, una minúscula y un número.';
     }
 
     if (!formData.confirmPassword) {
       nextErrors.confirmPassword = 'Por favor, confirma tu contraseña.';
-    } else if (formData.password !== formData.confirmPassword) {
+    } else if (cleanPassword !== cleanConfirmPassword) {
       nextErrors.confirmPassword = 'Las contraseñas no coinciden.';
     }
 
