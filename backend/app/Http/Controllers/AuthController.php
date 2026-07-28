@@ -30,13 +30,12 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Enviar notificación de verificación por correo
+        event(new \Illuminate\Auth\Events\Registered($user));
 
         return response()->json([
-            'message' => 'Usuario registrado exitosamente',
+            'message' => 'Usuario registrado exitosamente. Por favor, verifica tu correo electrónico.',
             'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
         ], 201);
     }
 
@@ -63,7 +62,14 @@ class AuthController extends Controller
             ]);
         }
 
-        // 2. Validar que la contraseña sea correcta
+        // 2. Validar que el usuario haya verificado su correo
+        if (! $user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => ['Debes confirmar tu correo electrónico antes de iniciar sesión. Por favor, revisa tu bandeja de entrada.'],
+            ]);
+        }
+
+        // 3. Validar que la contraseña sea correcta
         if (! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'password' => ['La contraseña ingresada es incorrecta.'],

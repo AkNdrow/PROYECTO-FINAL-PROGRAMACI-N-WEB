@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LoginView.css';
 
 export default function LoginView({ onLogin, onNavigateToRegister }) {
@@ -9,6 +9,16 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verified') === '1') {
+      setIsVerified(true);
+      // Limpiar URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -130,6 +140,21 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
           <h1>CleverNote</h1>
           <p>Organiza tus ideas y documentos de forma simple.</p>
         </div>
+
+        {isVerified && (
+          <div style={{
+            background: 'rgba(34, 197, 94, 0.15)',
+            border: '1px solid rgba(34, 197, 94, 0.4)',
+            color: '#4ade80',
+            padding: '0.75rem 1rem',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>
+            ¡Correo verificado con éxito! Ya puedes iniciar sesión.
+          </div>
+        )}
 
         {errors.general && (
           <div style={{

@@ -71,25 +71,25 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
           }),
         });
 
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (jsonErr) {
+          console.error('Respuesta no-JSON recibida del servidor:', responseText);
+          throw new Error(`El servidor backend devolvió una respuesta no válida (HTTP ${response.status}). Revisa la ruta de la API.`);
+        }
+
         if (!response.ok) {
-          const data = await response.json();
           throw new Error(data.message || 'Error al registrar usuario');
         }
 
-        const registeredUsers = JSON.parse(localStorage.getItem('clevernote_registered_users') || '[]');
-        registeredUsers.push(formData);
-        localStorage.setItem('clevernote_registered_users', JSON.stringify(registeredUsers));
-
-        if (onRegisterSuccess) onRegisterSuccess();
-        else onNavigateToLogin();
+        // Si fue exitoso (201)
+        alert('¡Cuenta creada con éxito! Se ha enviado un enlace a tu correo. Por favor, revísalo para verificar tu cuenta antes de iniciar sesión.');
+        
+        if (onNavigateToLogin) onNavigateToLogin();
       } catch (err) {
-        // Fallback local en caso de estar offline
-        const registeredUsers = JSON.parse(localStorage.getItem('clevernote_registered_users') || '[]');
-        registeredUsers.push(formData);
-        localStorage.setItem('clevernote_registered_users', JSON.stringify(registeredUsers));
-
-        if (onRegisterSuccess) onRegisterSuccess();
-        else onNavigateToLogin();
+        setErrors({ general: err.message });
       } finally {
         setLoading(false);
       }
