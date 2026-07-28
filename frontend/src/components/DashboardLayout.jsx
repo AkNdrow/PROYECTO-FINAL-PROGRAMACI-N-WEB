@@ -11,10 +11,6 @@ import LoadingSpinner from './LoadingSpinner';
 import Modal from './Modal';
 import { useAuth } from '../context/AuthContext';
 
-
-  const { user } = useAuth();
-  const [activeSection, setActiveSection] = useState('editor');
-  const [isLoading, setIsLoading] = useState(false);
 function parseMarkdownToHtml(mdText) {
   if (!mdText) return '';
 
@@ -46,28 +42,14 @@ function parseMarkdownToHtml(mdText) {
 }
 
 export default function DashboardLayout({ onLogout, initialSection = 'dashboard' }) {
+  const { user, logout } = useAuth();
   const [activeSection, setActiveSection] = useState(initialSection);
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalVariant, setModalVariant] = useState('create');
 
-  let displayName = 'Usuario';
-  if (typeof user === 'object' && user !== null) {
-    if (user.name) displayName = user.name;
-    else if (user.fullName) displayName = user.fullName;
-    else if (user.email) {
-      const uname = user.email.split('@')[0];
-      displayName = uname.charAt(0).toUpperCase() + uname.slice(1);
-    }
-  } else if (typeof user === 'string' && user.length > 0) {
-    if (user.includes('@')) {
-      const uname = user.split('@')[0];
-      displayName = uname.charAt(0).toUpperCase() + uname.slice(1);
-    } else {
-      displayName = user;
-    }
-  }
+  const displayName = user?.name || 'Moisés';
 
   const handleSave = () => {
     setShowAlert(true);
@@ -186,11 +168,7 @@ El proyecto busca consolidar una experiencia visual limpia y colaborativa para e
       <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
 
       <header className="navbar-container">
-<<<<<<< HEAD
-        <Navbar userName={displayName} title="CleverNote / Dashboard" onLogout={onLogout} />
-=======
-        <Navbar userName="Moisés" title={`CleverNote / ${sectionTitles[activeSection] || 'Inicio'}`} onLogout={onLogout} />
->>>>>>> c21a946 (  vistas del dashboard)
+        <Navbar userName={displayName} title={`CleverNote / ${sectionTitles[activeSection] || 'Inicio'}`} onLogout={() => { logout(); onLogout?.(); }} />
       </header>
 
       <main className="content-container">
