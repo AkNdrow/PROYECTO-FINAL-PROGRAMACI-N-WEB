@@ -15,13 +15,22 @@ export default function DashboardLayout({ onLogout }) {
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState('editor');
   const [isLoading, setIsLoading] = useState(false);
-  const [showAlert, setShowAlert] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalVariant, setModalVariant] = useState('create');
 
   const displayName = typeof user === 'object' && user !== null
     ? (user.name || user.fullName || (user.email ? user.email.split('@')[0] : 'Usuario'))
     : (typeof user === 'string' && user ? user : 'Usuario');
+
+  const handleSave = () => {
+    console.log('Clic en Guardar');
+    setShowAlert(true);
+  };
+
+  const closeAlert = () => {
+    setShowAlert(false);
+  };
 
   return (
     <div className="dashboard-container">
@@ -32,14 +41,6 @@ export default function DashboardLayout({ onLogout }) {
       </header>
 
       <main className="content-container">
-        {showAlert ? (
-          <AlertMessage
-            type="error"
-            message="No se pudo guardar el documento. Intenta de nuevo."
-            onClose={() => setShowAlert(false)}
-          />
-        ) : null}
-
         <button
           type="button"
           className="demo-toggle"
@@ -108,7 +109,7 @@ export default function DashboardLayout({ onLogout }) {
                 <button type="button" className="modal-button secondary" onClick={() => setIsModalOpen(false)}>
                   Cancelar
                 </button>
-                <button type="button" className="modal-button primary">
+                <button type="button" className="modal-button primary" onClick={() => setShowAlert(true)}>
                   Guardar
                 </button>
               </div>
@@ -123,7 +124,14 @@ export default function DashboardLayout({ onLogout }) {
             <Pagination />
           </div>
         ) : (
-          <MarkdownEditorView />
+          <MarkdownEditorView onSave={handleSave} />
+        )}
+
+        {showAlert && (
+          <AlertMessage
+            message="No se pudo guardar el documento. Intenta de nuevo."
+            onClose={closeAlert}
+          />
         )}
       </main>
     </div>

@@ -75,11 +75,10 @@ function parseMarkdownToHtml(mdText) {
   }).join('');
 }
 
-export default function MarkdownEditorView() {
+export default function MarkdownEditorView({ onSave }) {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const pageParam = searchParams.get('page') || '1';
-
   const [markdownContent, setMarkdownContent] = useState(defaultMarkdown);
   const [activeFile, setActiveFile] = useState(id ? `doc_${id}.md` : 'main.md');
   const [saveStatus, setSaveStatus] = useState('Guardado ✓');
@@ -127,7 +126,10 @@ export default function MarkdownEditorView() {
         <div className="toolbar-actions">
           <button
             className="toolbar-button secondary"
-            onClick={handleSave}
+            onClick={() => {
+              handleSave();
+              if (onSave) onSave();
+            }}
             disabled={isSaving}
           >
             {isSaving ? 'Guardando...' : 'Guardar'}
