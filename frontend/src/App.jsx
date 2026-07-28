@@ -25,9 +25,5 @@ export default function App() {
     );
   }
 
-  return (
-    <DashboardLayout onLogout={() => setCurrentView('login')}>
-      <MarkdownEditorView />
-    </DashboardLayout>
-  );
+  return <DashboardLayout onLogout={() => setCurrentView('login')} />;
 }

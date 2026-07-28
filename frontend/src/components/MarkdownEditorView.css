@@ -198,6 +198,10 @@ body {
   border-radius: 0.35rem;
 }
 
+.table-section {
+  margin-top: 1rem;
+}
+
 @media (max-width: 900px) {
   .markdown-layout {
     grid-template-columns: 1fr;
