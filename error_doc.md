@@ -63,18 +63,14 @@ Al interactuar con los formularios de Login o Registro en el cliente React despl
 
 ### 🛠️ Soluciones Aplicadas
 
-1. **Ruteo de Nginx con Prioridad Absoluta (`location ^~ /api`)**:
-   Se reestructuró la configuración de Nginx en el VPS para preservar la ruta `/api` intacta y dirigirla a FastCGI sin recortar prefijos:
+1. **Ruteo de Nginx con Prioridad Absoluta y Pase Directo a PHP (`location /api`)**:
+   - **Problema de 405 Not Allowed**: Al usar `alias` junto con `try_files` en Nginx, las peticiones POST generaban el error HTTP 405 porque Nginx intentaba tratarlas como archivos estáticos si la resolución de rutas fallaba en ubicaciones anidadas.
+   - **Solución**: Se simplificó el bloque de Nginx para omitir `try_files` y pasar absolutamente todas las peticiones `/api/*` de manera directa a FastCGI (`index.php`), dejando que Laravel se encargue de todo el enrutamiento:
    ```nginx
-   location ^~ /api {
-       alias /var/www/html/CleverNote/backend/public;
-       try_files $uri $uri/ /api/index.php?$query_string;
-
-       location ~ \.php$ {
-           include fastcgi_params;
-           fastcgi_param SCRIPT_FILENAME /var/www/html/CleverNote/backend/public/index.php;
-           fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-       }
+   location /api {
+       include fastcgi_params;
+       fastcgi_param SCRIPT_FILENAME /var/www/html/CleverNote/backend/public/index.php;
+       fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
    }
    ```
 
