@@ -6,6 +6,7 @@ import MarkdownEditorView from './MarkdownEditorView';
 import DataTable from './DataTable';
 import LoadingSpinner from './LoadingSpinner';
 import AlertMessage from './AlertMessage';
+import Pagination from './Pagination';
 
 export default function DashboardLayout({ onLogout }) {
   const [activeSection, setActiveSection] = useState('editor');
@@ -39,7 +40,14 @@ export default function DashboardLayout({ onLogout }) {
 
         {isLoading ? <LoadingSpinner text="Cargando contenido..." /> : null}
 
-        {activeSection === 'completed' ? <DataTable /> : <MarkdownEditorView />}
+        {activeSection === 'completed' ? (
+          <div>
+            <DataTable />
+            <Pagination />
+          </div>
+        ) : (
+          <MarkdownEditorView />
+        )}
       </main>
     </div>
   );
