@@ -30,6 +30,7 @@ El proyecto se organiza bajo una estructura de monorepo limpio con separación d
 ## ⚡ Regla de Optimización de Código
 
 proyecto:
+* Se utiliza el enfoque de commits progresivos para las tareas de tal manera que cada commit no supere las 200 lineas de codigo.
 * Se reutilizan componentes modulares en React.
 * Se evita añadir librerías innecesarias.
 * El backend en Laravel se mantiene exclusivamente como una API REST liviana.

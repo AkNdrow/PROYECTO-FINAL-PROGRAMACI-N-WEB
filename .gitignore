@@ -65,3 +65,7 @@ backend/public/build
 backend/node_modules/
 backend/database/*.sqlite
 backend/database/*.sqlite-journal
+
+# Manuales y guías privadas
+guia_test.md
+guia_vps.md

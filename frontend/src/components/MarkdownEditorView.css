@@ -48,6 +48,12 @@ body {
   color: #4ade80;
   font-size: 0.85rem;
   font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.status-pill.saving {
+  background: rgba(234, 179, 8, 0.16);
+  color: #facc15;
 }
 
 .toolbar-actions {
