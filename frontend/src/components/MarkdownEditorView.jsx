@@ -58,7 +58,7 @@ function parseMarkdownToHtml(mdText) {
   return html;
 }
 
-export default function MarkdownEditorView() {
+export default function MarkdownEditorView({ onSave }) {
   const [markdownContent, setMarkdownContent] = useState(defaultMarkdown);
   const [activeFile, setActiveFile] = useState('main.md');
 
@@ -71,7 +71,7 @@ export default function MarkdownEditorView() {
         </div>
 
         <div className="toolbar-actions">
-          <button className="toolbar-button secondary">Guardar</button>
+          <button className="toolbar-button secondary" onClick={onSave}>Guardar</button>
           <button className="toolbar-button primary">Exportar PDF</button>
         </div>
       </header>
