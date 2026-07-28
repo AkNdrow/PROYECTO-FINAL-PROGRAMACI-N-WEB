@@ -8,11 +8,14 @@ import LoadingSpinner from './LoadingSpinner';
 import AlertMessage from './AlertMessage';
 import Pagination from './Pagination';
 import SearchBar from './SearchBar';
+import Modal from './Modal';
 
 export default function DashboardLayout({ onLogout }) {
   const [activeSection, setActiveSection] = useState('editor');
   const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalVariant, setModalVariant] = useState('create');
 
   return (
     <div className="dashboard-container">
@@ -39,7 +42,73 @@ export default function DashboardLayout({ onLogout }) {
           {isLoading ? 'Ocultar carga' : 'Mostrar carga'}
         </button>
 
+        <div className="demo-actions">
+          <button
+            type="button"
+            className="demo-toggle"
+            onClick={() => {
+              setModalVariant('create');
+              setIsModalOpen(true);
+            }}
+          >
+            Abrir crear/editar
+          </button>
+          <button
+            type="button"
+            className="demo-toggle danger"
+            onClick={() => {
+              setModalVariant('delete');
+              setIsModalOpen(true);
+            }}
+          >
+            Abrir eliminar
+          </button>
+        </div>
+
         {isLoading ? <LoadingSpinner text="Cargando contenido..." /> : null}
+
+        <Modal
+          isOpen={isModalOpen}
+          title={modalVariant === 'delete' ? 'Eliminar documento' : 'Crear / Editar documento'}
+          onClose={() => setIsModalOpen(false)}
+        >
+          {modalVariant === 'delete' ? (
+            <>
+              <p className="modal-message">¿Estás seguro de que deseas eliminar este documento?</p>
+              <div className="modal-actions">
+                <button type="button" className="modal-button secondary" onClick={() => setIsModalOpen(false)}>
+                  Cancelar
+                </button>
+                <button type="button" className="modal-button danger">
+                  Confirmar eliminación
+                </button>
+              </div>
+            </>
+          ) : (
+            <form className="modal-form">
+              <div className="modal-field">
+                <label>Título</label>
+                <input type="text" placeholder="Nombre del documento" />
+              </div>
+              <div className="modal-field">
+                <label>Categoría</label>
+                <select defaultValue="Proyecto">
+                  <option value="Proyecto">Proyecto</option>
+                  <option value="Diseño">Diseño</option>
+                  <option value="Reunión">Reunión</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="modal-button secondary" onClick={() => setIsModalOpen(false)}>
+                  Cancelar
+                </button>
+                <button type="button" className="modal-button primary">
+                  Guardar
+                </button>
+              </div>
+            </form>
+          )}
+        </Modal>
 
         {activeSection === 'completed' ? (
           <div>
