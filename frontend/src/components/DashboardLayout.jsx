@@ -7,6 +7,7 @@ import DataTable from './DataTable';
 import LoadingSpinner from './LoadingSpinner';
 import AlertMessage from './AlertMessage';
 import Pagination from './Pagination';
+import SearchBar from './SearchBar';
 
 export default function DashboardLayout({ onLogout }) {
   const [activeSection, setActiveSection] = useState('editor');
@@ -42,6 +43,7 @@ export default function DashboardLayout({ onLogout }) {
 
         {activeSection === 'completed' ? (
           <div>
+            <SearchBar />
             <DataTable />
             <Pagination />
           </div>
