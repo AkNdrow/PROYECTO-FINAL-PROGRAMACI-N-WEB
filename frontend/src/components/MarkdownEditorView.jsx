@@ -1,23 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './MarkdownEditorView.css';
 
-const initialMarkdown = `# Progreso semanal
+const defaultMarkdown = `# Progreso semanal
 
 - Revisar requisitos del proyecto.
 - Preparar propuesta de diseño.
 - Enviar cambios para revisión.
 
 > Nota: Mantener el tono claro y directo.
+
+## Tareas Pendientes
+1. Integrar API REST en Laravel.
+2. Probar autenticación con tokens Sanctum.
 `;
 
 const files = ['main.md', 'resumen.md', 'notas.txt'];
 
+/**
+ * Motor ligero de parsing de Markdown a HTML seguro
+ */
+function parseMarkdownToHtml(mdText) {
+  if (!mdText) return '';
+
+  let html = mdText
+    // Escapar etiquetas HTML básicas para evitar XSS
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Encabezados (# H1, ## H2, ### H3)
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+  // Citas (> texto)
+  html = html.replace(/^&gt;\s?(.*$)/gim, '<blockquote>$1</blockquote>');
+
+  // Negritas e Itálicas (**texto**, *texto*)
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  // Código en línea (`codigo`)
+  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+
+  // Listas desordenadas (- item o * item)
+  html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+  // Párrafos (líneas de texto normales)
+  html = html.split('\n\n').map(paragraph => {
+    if (paragraph.trim().startsWith('<h') || paragraph.trim().startsWith('<block') || paragraph.trim().startsWith('<ul')) {
+      return paragraph;
+    }
+    return `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`;
+  }).join('');
+
+  return html;
+}
+
 export default function MarkdownEditorView() {
+  const [markdownContent, setMarkdownContent] = useState(defaultMarkdown);
+  const [activeFile, setActiveFile] = useState('main.md');
+
   return (
     <div className="markdown-editor-view">
       <header className="markdown-toolbar">
         <div className="toolbar-title-block">
-          <h1>CleverNote / main.md</h1>
+          <h1>CleverNote / {activeFile}</h1>
           <span className="status-pill">Guardado ✓</span>
         </div>
 
@@ -36,7 +85,12 @@ export default function MarkdownEditorView() {
 
           <ul className="file-list">
             {files.map((file) => (
-              <li key={file} className={file === 'main.md' ? 'active' : ''}>
+              <li
+                key={file}
+                className={file === activeFile ? 'active' : ''}
+                onClick={() => setActiveFile(file)}
+                style={{ cursor: 'pointer' }}
+              >
                 <span className="file-icon">📄</span>
                 {file}
               </li>
@@ -47,29 +101,18 @@ export default function MarkdownEditorView() {
         <section className="editor-panel">
           <textarea
             className="markdown-textarea"
-            defaultValue={initialMarkdown}
+            value={markdownContent}
+            onChange={(e) => setMarkdownContent(e.target.value)}
             spellCheck={false}
+            placeholder="Escribe tu contenido en Markdown aquí..."
           />
         </section>
 
         <section className="preview-panel">
-          <div className="preview-paper">
-            <h1>Progreso semanal</h1>
-            <p>
-              Este panel muestra una vista limpia de la documentación para revisar el
-              contenido antes de compartirlo.
-            </p>
-
-            <ul>
-              <li>Revisar requisitos del proyecto.</li>
-              <li>Preparar propuesta de diseño.</li>
-              <li>Enviar cambios para revisión.</li>
-            </ul>
-
-            <blockquote>
-              Nota: Mantener el tono claro y directo.
-            </blockquote>
-          </div>
+          <div
+            className="preview-paper"
+            dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(markdownContent) }}
+          />
         </section>
       </main>
     </div>
