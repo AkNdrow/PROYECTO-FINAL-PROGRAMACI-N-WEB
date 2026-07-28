@@ -11,6 +11,7 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,18 +20,20 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
       [name]: value
     });
 
-    if (errors[name]) {
+    if (errors[name] || errors.general) {
       setErrors({
         ...errors,
-        [name]: ''
+        [name]: '',
+        general: ''
       });
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const nextErrors = {};
+    const emailRegex = /\S+@\S+\.\S+/;
 
     if (!formData.fullName.trim()) {
       nextErrors.fullName = 'El nombre completo es obligatorio.';
@@ -41,7 +44,9 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     }
 
     if (!formData.email.trim()) {
-      nextErrors.email = 'Por favor, ingresa un correo electrónico válido.';
+      nextErrors.email = 'Por favor, ingresa tu correo electrónico.';
+    } else if (!emailRegex.test(formData.email.trim())) {
+      nextErrors.email = 'Ingresa un correo electrónico válido (ejemplo@dominio.com).';
     }
 
     if (!formData.password) {
@@ -59,115 +64,176 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length === 0) {
-      onRegisterSuccess();
+      setLoading(true);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+      try {
+        const response = await fetch(`${apiUrl}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            fullName: formData.fullName.trim(),
+            birthDate: formData.birthDate,
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+            password: formData.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (data.errors) {
+            const backendErrors = {};
+            if (data.errors.email) backendErrors.email = data.errors.email[0];
+            if (data.errors.password) backendErrors.password = data.errors.password[0];
+            if (data.errors.fullName) backendErrors.fullName = data.errors.fullName[0];
+            setErrors(backendErrors);
+            return;
+          }
+          throw new Error(data.message || 'Error al registrar usuario');
+        }
+
+        if (data.user) {
+          localStorage.setItem('clevernote_user', JSON.stringify(data.user));
+        }
+
+        onRegisterSuccess();
+      } catch (err) {
+        if (err.name === 'TypeError' || err.message.includes('Failed to fetch')) {
+          console.warn('API backend desconectada. Registrando usuario en modo local simulado.');
+          localStorage.setItem('clevernote_user', JSON.stringify({
+            fullName: formData.fullName.trim(),
+            email: formData.email.trim()
+          }));
+          onRegisterSuccess();
+        } else {
+          setErrors({ general: err.message || 'Error al crear la cuenta' });
+        }
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
-    <div className="register-container">
-      <div className="register-content">
-        {/* Columna Izquierda: Información */}
-        <div className="info-section">
-          <h1>Bienvenido a CleverNote</h1>
-          <p>
-            CleverNote es una plataforma centralizada para la gestión de tus notas
-            y documentos en Markdown. Organiza, edita y consulta tu información
-            de manera rápida y eficiente desde cualquier lugar.
-          </p>
+    <div className="register-page">
+      <div className="register-card">
+        <div className="register-brand">
+          <h2>Crea tu cuenta</h2>
+          <p>Únete a CleverNote y gestiona tus documentos Markdown.</p>
         </div>
 
-        {/* Columna Derecha: Formulario */}
-        <div className="form-section">
-          <h2>Crea tu cuenta</h2>
-          <p className="subtitle">Introduce tus datos</p>
-
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="input-group">
-              <label>Nombre Completo:</label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                className={errors.fullName ? 'error-input' : ''}
-                required
-              />
-              {errors.fullName && <span className="error-message">{errors.fullName}</span>}
-            </div>
-
-            <div className="input-group">
-              <label>Fecha de nacimiento:</label>
-              <input
-                type="date"
-                name="birthDate"
-                value={formData.birthDate}
-                onChange={handleChange}
-                className={errors.birthDate ? 'error-input' : ''}
-                required
-              />
-              {errors.birthDate && <span className="error-message">{errors.birthDate}</span>}
-            </div>
-
-            <div className="input-group">
-              <label>Correo electrónico:</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={errors.email ? 'error-input' : ''}
-                required
-              />
-              {errors.email && <span className="error-message">{errors.email}</span>}
-            </div>
-
-            <div className="input-group">
-              <label>Número de teléfono:</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="input-group">
-              <label>Contraseña:</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={errors.password ? 'error-input' : ''}
-                required
-              />
-              {errors.password && <span className="error-message">{errors.password}</span>}
-            </div>
-
-            <div className="input-group">
-              <label>Confirmar contraseña:</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={errors.confirmPassword ? 'error-input' : ''}
-                required
-              />
-              {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-            </div>
-
-            <button type="submit" className="btn-primary">
-              Crear cuenta
-            </button>
-          </form>
-
-          <div className="login-link-container">
-            <span>¿Ya tienes una cuenta?</span>
-            <button type="button" onClick={onNavigateToLogin} className="btn-secondary">
-              Inicia sesión
-            </button>
+        {errors.general && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            color: '#f87171',
+            padding: '0.75rem 1rem',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>
+            {errors.general}
           </div>
+        )}
+
+        <form className="register-form" onSubmit={handleSubmit} noValidate>
+          <div className="input-group">
+            <label>Nombre Completo:</label>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              className={errors.fullName ? 'error-input' : ''}
+              disabled={loading}
+              placeholder="Juan Pérez"
+            />
+            {errors.fullName && <span className="error-message">{errors.fullName}</span>}
+          </div>
+
+          <div className="input-group">
+            <label>Fecha de nacimiento:</label>
+            <input
+              type="date"
+              name="birthDate"
+              value={formData.birthDate}
+              onChange={handleChange}
+              className={errors.birthDate ? 'error-input' : ''}
+              disabled={loading}
+            />
+            {errors.birthDate && <span className="error-message">{errors.birthDate}</span>}
+          </div>
+
+          <div className="input-group">
+            <label>Correo electrónico:</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={errors.email ? 'error-input' : ''}
+              disabled={loading}
+              placeholder="tu@correo.com"
+            />
+            {errors.email && <span className="error-message">{errors.email}</span>}
+          </div>
+
+          <div className="input-group">
+            <label>Número de teléfono (opcional):</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              disabled={loading}
+              placeholder="+52 55 1234 5678"
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Contraseña:</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={errors.password ? 'error-input' : ''}
+              disabled={loading}
+              placeholder="••••••••"
+            />
+            {errors.password && <span className="error-message">{errors.password}</span>}
+          </div>
+
+          <div className="input-group">
+            <label>Confirmar contraseña:</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className={errors.confirmPassword ? 'error-input' : ''}
+              disabled={loading}
+              placeholder="••••••••"
+            />
+            {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+          </div>
+
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+          </button>
+        </form>
+
+        <div className="login-link-container">
+          <span>¿Ya tienes una cuenta?</span>
+          <button type="button" onClick={onNavigateToLogin} className="btn-secondary" disabled={loading}>
+            Inicia sesión
+          </button>
         </div>
       </div>
     </div>

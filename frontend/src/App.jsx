@@ -1,29 +1,50 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import MarkdownEditorView from './components/MarkdownEditorView';
 import LoginView from './components/LoginView';
 import RegisterView from './components/RegisterView';
 import DashboardLayout from './components/DashboardLayout';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('login');
+  const navigate = useNavigate();
 
-  if (currentView === 'register') {
-    return (
-      <RegisterView
-        onNavigateToLogin={() => setCurrentView('login')}
-        onRegisterSuccess={() => setCurrentView('editor')}
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          <LoginView
+            onLogin={() => navigate('/dashboard')}
+            onNavigateToRegister={() => navigate('/register')}
+          />
+        }
       />
-    );
-  }
-
-  if (currentView === 'login') {
-    return (
-      <LoginView
-        onLogin={() => setCurrentView('editor')}
-        onNavigateToRegister={() => setCurrentView('register')}
+      <Route
+        path="/register"
+        element={
+          <RegisterView
+            onNavigateToLogin={() => navigate('/login')}
+            onRegisterSuccess={() => navigate('/dashboard')}
+          />
+        }
       />
-    );
-  }
-
-  return <DashboardLayout onLogout={() => setCurrentView('login')} />;
+      <Route
+        path="/dashboard"
+        element={
+          <DashboardLayout onLogout={() => navigate('/login')}>
+            <MarkdownEditorView />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/editor/:id"
+        element={
+          <DashboardLayout onLogout={() => navigate('/login')}>
+            <MarkdownEditorView />
+          </DashboardLayout>
+        }
+      />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
 }
