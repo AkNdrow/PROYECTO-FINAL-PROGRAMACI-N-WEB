@@ -9,20 +9,26 @@ import AlertMessage from './AlertMessage';
 import Pagination from './Pagination';
 import SearchBar from './SearchBar';
 import Modal from './Modal';
+import { useAuth } from '../context/AuthContext';
 
 export default function DashboardLayout({ onLogout }) {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState('editor');
   const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalVariant, setModalVariant] = useState('create');
 
+  const displayName = typeof user === 'object' && user !== null
+    ? (user.name || user.fullName || (user.email ? user.email.split('@')[0] : 'Usuario'))
+    : (typeof user === 'string' && user ? user : 'Usuario');
+
   return (
     <div className="dashboard-container">
       <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
 
       <header className="navbar-container">
-        <Navbar userName="Moisés" title="CleverNote / Dashboard" onLogout={onLogout} />
+        <Navbar userName={displayName} title="CleverNote / Dashboard" onLogout={onLogout} />
       </header>
 
       <main className="content-container">

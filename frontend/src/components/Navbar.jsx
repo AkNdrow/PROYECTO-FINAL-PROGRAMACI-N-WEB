@@ -22,7 +22,7 @@ export default function Navbar({ userName = 'Usuario', title = 'CleverNote / Das
             onClick={() => setIsOpen((prev) => !prev)}
           >
             <div className="profile-avatar" aria-label="avatar de usuario">
-              {userName.charAt(0).toUpperCase()}
+              {(userName && userName.length > 0 ? userName.charAt(0) : 'U').toUpperCase()}
             </div>
             <div className="profile-info">
               <span className="profile-name">{userName}</span>
