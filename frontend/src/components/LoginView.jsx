@@ -69,7 +69,8 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
         try {
           data = JSON.parse(responseText);
         } catch (jsonErr) {
-          throw new Error('El servidor backend devolvió una respuesta inesperada.');
+          console.error('Respuesta no-JSON recibida del servidor:', responseText);
+          throw new Error(`El servidor backend devolvió una respuesta no válida (HTTP ${response.status}). Revisa la ruta de la API.`);
         }
 
         if (!response.ok) {
