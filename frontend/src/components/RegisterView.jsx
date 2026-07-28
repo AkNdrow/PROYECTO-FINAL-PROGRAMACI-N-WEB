@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import './RegisterView.css';
 
 export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
@@ -10,58 +10,43 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     password: '',
     confirmPassword: ''
   });
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-
+    setFormData({ ...formData, [name]: value });
     if (errors[name] || errors.general) {
-      setErrors({
-        ...errors,
-        [name]: '',
-        general: ''
-      });
+      setErrors({ ...errors, [name]: '', general: '' });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const nextErrors = {};
-    const emailRegex = /\S+@\S+\.\S+/;
 
     if (!formData.fullName.trim()) {
-      nextErrors.fullName = 'El nombre completo es obligatorio.';
+      nextErrors.fullName = 'El nombre es obligatorio.';
     }
 
-    if (!formData.birthDate) {
-      nextErrors.birthDate = 'La fecha de nacimiento es obligatoria.';
-    }
-
+    const emailRegex = /\S+@\S+\.\S+/;
     if (!formData.email.trim()) {
-      nextErrors.email = 'Por favor, ingresa tu correo electrónico.';
+      nextErrors.email = 'El correo es obligatorio.';
     } else if (!emailRegex.test(formData.email.trim())) {
-      nextErrors.email = 'Ingresa un correo electrónico válido (ejemplo@dominio.com).';
+      nextErrors.email = 'Correo no válido.';
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    const cleanPassword = (formData.password || '').trim();
-    const cleanConfirmPassword = (formData.confirmPassword || '').trim();
-
     if (!formData.password) {
-      nextErrors.password = 'Por favor, ingresa una contraseña.';
-    } else if (!passwordRegex.test(cleanPassword)) {
-      nextErrors.password = 'La contraseña debe tener al menos 8 caracteres, incluir al menos una letra mayúscula, una minúscula y un número.';
+      nextErrors.password = 'La contraseña es obligatoria.';
+    } else if (!passwordRegex.test(formData.password)) {
+      nextErrors.password = 'Mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
     }
 
-    if (!formData.confirmPassword) {
-      nextErrors.confirmPassword = 'Por favor, confirma tu contraseña.';
-    } else if (cleanPassword !== cleanConfirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       nextErrors.confirmPassword = 'Las contraseñas no coinciden.';
     }
 
@@ -70,25 +55,6 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     if (Object.keys(nextErrors).length === 0) {
       setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000/api' : '/api');
-
-      // Función auxiliar para registrar en base de datos local (localStorage)
-      const saveUserLocally = () => {
-        const registeredUsers = JSON.parse(localStorage.getItem('clevernote_registered_users') || '[]');
-        const newUser = {
-          fullName: formData.fullName.trim(),
-          name: formData.fullName.trim(),
-          email: formData.email.trim().toLowerCase(),
-          password: formData.password
-        };
-        const existingIndex = registeredUsers.findIndex(u => u.email === newUser.email);
-        if (existingIndex >= 0) {
-          registeredUsers[existingIndex] = newUser;
-        } else {
-          registeredUsers.push(newUser);
-        }
-        localStorage.setItem('clevernote_registered_users', JSON.stringify(registeredUsers));
-        localStorage.setItem('clevernote_user', JSON.stringify(newUser));
-      };
 
       try {
         const response = await fetch(`${apiUrl}/register`, {
@@ -99,54 +65,31 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
           },
           body: JSON.stringify({
             name: formData.fullName.trim(),
-            fullName: formData.fullName.trim(),
-            birthDate: formData.birthDate,
             email: formData.email.trim(),
-            phone: formData.phone.trim(),
             password: formData.password,
             password_confirmation: formData.confirmPassword,
           }),
         });
 
-        const responseText = await response.text();
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (jsonErr) {
-          console.error('Respuesta no-JSON recibida del servidor:', responseText);
-          throw new Error(`El servidor backend devolvió una respuesta no válida (HTTP ${response.status}). Revisa la ruta de la API.`);
-        }
-
         if (!response.ok) {
-          if (data.errors) {
-            const backendErrors = {};
-            if (data.errors.email) backendErrors.email = data.errors.email[0];
-            if (data.errors.password) backendErrors.password = data.errors.password[0];
-            if (data.errors.name || data.errors.fullName) backendErrors.fullName = (data.errors.name || data.errors.fullName)[0];
-            setErrors(backendErrors);
-            return;
-          }
+          const data = await response.json();
           throw new Error(data.message || 'Error al registrar usuario');
         }
 
-        saveUserLocally();
+        const registeredUsers = JSON.parse(localStorage.getItem('clevernote_registered_users') || '[]');
+        registeredUsers.push(formData);
+        localStorage.setItem('clevernote_registered_users', JSON.stringify(registeredUsers));
 
-        if (data.access_token || data.token) {
-          localStorage.setItem('clevernote_token', data.access_token || data.token);
-        }
-        if (data.user) {
-          localStorage.setItem('clevernote_user', JSON.stringify(data.user));
-        }
-
-        onRegisterSuccess(data.user || { fullName: formData.fullName.trim(), email: formData.email.trim() });
+        if (onRegisterSuccess) onRegisterSuccess();
+        else onNavigateToLogin();
       } catch (err) {
-        if (err.name === 'TypeError' || err.message.includes('Failed to fetch')) {
-          console.warn('API backend desconectada. Registrando usuario en modo local simulado.');
-          saveUserLocally();
-          onRegisterSuccess({ fullName: formData.fullName.trim(), email: formData.email.trim() });
-        } else {
-          setErrors({ general: err.message || 'Error al crear la cuenta' });
-        }
+        // Fallback local en caso de estar offline
+        const registeredUsers = JSON.parse(localStorage.getItem('clevernote_registered_users') || '[]');
+        registeredUsers.push(formData);
+        localStorage.setItem('clevernote_registered_users', JSON.stringify(registeredUsers));
+
+        if (onRegisterSuccess) onRegisterSuccess();
+        else onNavigateToLogin();
       } finally {
         setLoading(false);
       }
@@ -157,115 +100,159 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
     <div className="register-page">
       <div className="register-card">
         <div className="register-brand">
-          <h2>Crea tu cuenta</h2>
+          <h1>Crea tu cuenta</h1>
           <p>Únete a CleverNote y gestiona tus documentos Markdown.</p>
         </div>
 
         {errors.general && (
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            color: '#f87171',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            fontSize: '0.85rem',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
+          <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '1rem', textAlign: 'center' }}>
             {errors.general}
           </div>
         )}
 
         <form className="register-form" onSubmit={handleSubmit} noValidate>
-          <div className="input-group">
-            <label>Nombre Completo:</label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              className={errors.fullName ? 'error-input' : ''}
-              disabled={loading}
-              placeholder="Juan Pérez"
-            />
+          <label className="field">
+            <span>Nombre Completo:</span>
+            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Juan Pérez" disabled={loading} />
             {errors.fullName && <span className="error-message">{errors.fullName}</span>}
-          </div>
+          </label>
 
-          <div className="input-group">
-            <label>Fecha de nacimiento:</label>
-            <input
-              type="date"
-              name="birthDate"
-              value={formData.birthDate}
-              onChange={handleChange}
-              className={errors.birthDate ? 'error-input' : ''}
-              disabled={loading}
-            />
-            {errors.birthDate && <span className="error-message">{errors.birthDate}</span>}
-          </div>
+          <label className="field">
+            <span>Fecha de nacimiento:</span>
+            <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} disabled={loading} />
+          </label>
 
-          <div className="input-group">
-            <label>Correo electrónico:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={errors.email ? 'error-input' : ''}
-              disabled={loading}
-              placeholder="tu@correo.com"
-            />
+          <label className="field">
+            <span>Correo electrónico:</span>
+            <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="tu@correo.com" disabled={loading} />
             {errors.email && <span className="error-message">{errors.email}</span>}
-          </div>
+          </label>
 
-          <div className="input-group">
-            <label>Número de teléfono (opcional):</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              disabled={loading}
-              placeholder="+52 55 1234 5678"
-            />
-          </div>
+          <label className="field">
+            <span>Número de teléfono (opcional):</span>
+            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+52 55 1234 5678" disabled={loading} />
+          </label>
 
-          <div className="input-group">
-            <label>Contraseña:</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={errors.password ? 'error-input' : ''}
-              disabled={loading}
-              placeholder="••••••••"
-            />
+          {/* Campo Contraseña */}
+          <label className="field">
+            <span>Contraseña:</span>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                disabled={loading}
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#60a5fa',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" x2="22" y1="2" y2="22"/>
+                  </svg>
+                )}
+              </button>
+            </div>
             {errors.password && <span className="error-message">{errors.password}</span>}
-          </div>
+          </label>
 
-          <div className="input-group">
-            <label>Confirmar contraseña:</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={errors.confirmPassword ? 'error-input' : ''}
-              disabled={loading}
-              placeholder="••••••••"
-            />
+          {/* Campo Confirmar Contraseña */}
+          <label className="field">
+            <span>Confirmar contraseña:</span>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                disabled={loading}
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#60a5fa',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showConfirmPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" x2="22" y1="2" y2="22"/>
+                  </svg>
+                )}
+              </button>
+            </div>
             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-          </div>
+          </label>
 
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <button type="submit" className="register-button" disabled={loading} style={{ marginTop: '1rem' }}>
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
         </form>
 
-        <div className="login-link-container">
-          <span>¿Ya tienes una cuenta?</span>
-          <button type="button" onClick={onNavigateToLogin} className="btn-secondary" disabled={loading}>
+        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
+            ¿Ya tienes una cuenta?{' '}
+          </span>
+          <button
+            type="button"
+            onClick={onNavigateToLogin}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#3b82f6',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+              textDecoration: 'underline',
+              padding: 0
+            }}
+          >
             Inicia sesión
           </button>
         </div>
