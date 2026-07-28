@@ -1,30 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './DashboardLayout.css';
 import Navbar from './Navbar';
+import Sidebar from './Sidebar';
+import MarkdownEditorView from './MarkdownEditorView';
+import DataTable from './DataTable';
 
-export default function DashboardLayout({ children, onLogout }) {
+export default function DashboardLayout({ onLogout }) {
+  const [activeSection, setActiveSection] = useState('editor');
+
   return (
     <div className="dashboard-container">
-      <aside className="sidebar-container">
-        <div className="sidebar-brand">CleverNote</div>
-        <nav className="sidebar-nav">
-          <button type="button" className="sidebar-link active">
-            Editor
-          </button>
-          <button type="button" className="sidebar-link">
-            Archivos
-          </button>
-          <button type="button" className="sidebar-link">
-            Exportar
-          </button>
-        </nav>
-      </aside>
+      <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
 
       <header className="navbar-container">
         <Navbar userName="Moisés" title="CleverNote / Dashboard" />
       </header>
 
-      <main className="content-container">{children}</main>
+      <main className="content-container">
+        {activeSection === 'completed' ? <DataTable /> : <MarkdownEditorView />}
+      </main>
     </div>
   );
 }
