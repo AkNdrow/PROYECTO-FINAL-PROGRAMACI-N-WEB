@@ -104,6 +104,7 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
             email: formData.email.trim(),
             phone: formData.phone.trim(),
             password: formData.password,
+            password_confirmation: formData.confirmPassword,
           }),
         });
 
