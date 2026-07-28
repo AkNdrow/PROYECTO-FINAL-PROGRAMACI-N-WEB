@@ -37,6 +37,10 @@
   cursor: pointer;
 }
 
+.navbar-profile-wrapper {
+  position: relative;
+}
+
 .navbar-profile {
   display: flex;
   align-items: center;
@@ -45,6 +49,8 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.7);
+  color: #f8fafc;
+  cursor: pointer;
 }
 
 .profile-avatar {
@@ -72,4 +78,37 @@
 .profile-role {
   font-size: 0.75rem;
   color: #94a3b8;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  min-width: 180px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(2, 6, 23, 0.35);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #e2e8f0;
+  text-align: left;
+  padding: 0.8rem 0.95rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.dropdown-item:hover {
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.dropdown-item.danger {
+  color: #fda4af;
 }

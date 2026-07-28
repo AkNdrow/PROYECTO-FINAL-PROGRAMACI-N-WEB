@@ -13,7 +13,7 @@ export default function DashboardLayout({ onLogout }) {
       <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
 
       <header className="navbar-container">
-        <Navbar userName="Moisés" title="CleverNote / Dashboard" />
+        <Navbar userName="Moisés" title="CleverNote / Dashboard" onLogout={onLogout} />
       </header>
 
       <main className="content-container">
