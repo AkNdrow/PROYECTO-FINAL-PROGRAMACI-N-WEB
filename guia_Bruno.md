@@ -83,12 +83,10 @@ Actualmente en tu API tienes programado el recurso `apiResource('items')`, el cu
 3. No necesita Body.
 4. **Send**. Te devolverá un 200 OK confirmando que fue borrado. Si intentas hacer un GET al ID 1, ahora te dará 404 Not Found.
 
----
-
-## 4. ¿Cómo Borrar USUARIOS (Correos de prueba)?
+## 4. CRUD Completo de Usuarios
 
 > [!TIP]
-> ¡He creado esta ruta para ti! Ya puedes borrar usuarios usando Bruno, pero asegúrate de actualizar el código en tu VPS primero.
+> ¡He creado el Controlador completo de Usuarios para ti! Ya puedes Listar, Ver, Actualizar y Borrar usuarios directamente desde Bruno, al igual que los ítems. Recuerda que no existe el método POST de usuarios aquí porque la creación está delegada a la ruta segura de `/register`.
 
 **Paso A: Actualizar el VPS**
 Entra por SSH a tu VPS y ejecuta:
@@ -96,11 +94,35 @@ Entra por SSH a tu VPS y ejecuta:
 cd /var/www/html/CleverNote
 git pull origin main
 ```
-Esto descargará la nueva ruta protegida `DELETE /api/users/{id}` que acabo de programar.
 
-**Paso B: Borrar en Bruno**
-1. Method: `DELETE` | URL: `{{base_url}}/users/5` *(Donde 5 es el ID del usuario. Para saber tu ID, puedes usar el GET de Items y ver el user_id, o simplemente probar números).*
-2. Pestaña **Auth** -> Bearer Token.
-3. **Send**. Te devolverá el mensaje `"Usuario eliminado correctamente"`.
+**Paso B: Probar el CRUD en Bruno**
 
-¡Listo! El usuario y su correo desaparecerán y podrás volver a intentar registrarlo desde cero en la aplicación de React.
+- **Leer todos los usuarios:** Method: `GET` | URL: `{{base_url}}/users`
+- **Ver un usuario en específico:** Method: `GET` | URL: `{{base_url}}/users/5`
+- **Actualizar nombre de un usuario:** Method: `PUT` | URL: `{{base_url}}/users/5` 
+  *(Body JSON: `{"name": "Nombre Actualizado"}`)*
+- **Borrar un usuario:** Method: `DELETE` | URL: `{{base_url}}/users/5` 
+
+---
+
+## 5. Borrado Manual Rápido (Consola MySQL)
+
+Si te quedas bloqueado en el Login (por ejemplo, si el VPS te exige verificar el correo pero no te llega) y **no puedes obtener tu Token para usar la API**, la forma más rápida de borrar tu cuenta de prueba es directamente en la base de datos del VPS.
+
+Abre la terminal SSH de tu VPS y ejecuta:
+
+```bash
+# Entrar a la base de datos (te pedirá la contraseña del VPS o MySQL)
+sudo mysql -u root -p
+
+# Seleccionar la base de datos
+USE clevernote_db;
+
+# Borrar el usuario de prueba (Cámbialo por tu correo real)
+DELETE FROM users WHERE email = 'tu_correo_de_prueba@gmail.com';
+
+# Salir
+exit;
+```
+
+Al hacer esto, el correo quedará liberado inmediatamente y podrás registrarlo de nuevo.

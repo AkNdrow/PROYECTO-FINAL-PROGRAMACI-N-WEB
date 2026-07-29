@@ -62,8 +62,8 @@ class AuthController extends Controller
             ]);
         }
 
-        // 2. Validar que el usuario haya verificado su correo
-        if (! $user->hasVerifiedEmail()) {
+        // 2. Validar que el usuario haya verificado su correo (Bypass opcional para el VPS)
+        if (env('REQUIRE_EMAIL_VERIFICATION', true) && ! $user->hasVerifiedEmail()) {
             throw ValidationException::withMessages([
                 'email' => ['Debes confirmar tu correo electrónico antes de iniciar sesión. Por favor, revisa tu bandeja de entrada.'],
             ]);
