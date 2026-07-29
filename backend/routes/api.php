@@ -23,5 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('items', ItemController::class);
-    Route::apiResource('users', UserController::class)->except(['store']);
+
+    // Rutas protegidas solo para el Administrador
+    Route::middleware('role:Administrador')->group(function () {
+        Route::apiResource('users', UserController::class)->except(['store']);
+    });
 });
