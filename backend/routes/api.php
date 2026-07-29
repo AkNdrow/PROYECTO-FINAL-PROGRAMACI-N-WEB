@@ -15,6 +15,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify']
 Route::post('/email/verification-notification', [VerifyEmailController::class, 'resend'])->middleware(['throttle:6,1'])->name('verification.send');
 
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\UserController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -22,10 +23,5 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('items', ItemController::class);
-
-    // Ruta para eliminar usuarios desde Bruno
-    Route::delete('/users/{id}', function ($id) {
-        App\Models\User::destroy($id);
-        return response()->json(['message' => 'Usuario eliminado correctamente']);
-    });
+    Route::apiResource('users', UserController::class)->except(['store']);
 });

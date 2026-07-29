@@ -85,10 +85,10 @@ Actualmente en tu API tienes programado el recurso `apiResource('items')`, el cu
 
 ---
 
-## 4. ¿Cómo Borrar USUARIOS (Correos de prueba)?
+## 4. CRUD Completo de Usuarios
 
 > [!TIP]
-> ¡He creado esta ruta para ti! Ya puedes borrar usuarios usando Bruno, pero asegúrate de actualizar el código en tu VPS primero.
+> ¡He creado el Controlador completo de Usuarios para ti! Ya puedes Listar, Ver, Actualizar y Borrar usuarios directamente desde Bruno, al igual que los ítems. Recuerda que no existe el método POST de usuarios aquí porque la creación está delegada a la ruta segura de `/register`.
 
 **Paso A: Actualizar el VPS**
 Entra por SSH a tu VPS y ejecuta:
@@ -96,11 +96,15 @@ Entra por SSH a tu VPS y ejecuta:
 cd /var/www/html/CleverNote
 git pull origin main
 ```
-Esto descargará la nueva ruta protegida `DELETE /api/users/{id}` que acabo de programar.
+Esto descargará el nuevo `UserController` que acabo de programar.
 
-**Paso B: Borrar en Bruno**
-1. Method: `DELETE` | URL: `{{base_url}}/users/5` *(Donde 5 es el ID del usuario. Para saber tu ID, puedes usar el GET de Items y ver el user_id, o simplemente probar números).*
-2. Pestaña **Auth** -> Bearer Token.
-3. **Send**. Te devolverá el mensaje `"Usuario eliminado correctamente"`.
+**Paso B: Probar el CRUD en Bruno**
 
-¡Listo! El usuario y su correo desaparecerán y podrás volver a intentar registrarlo desde cero en la aplicación de React.
+- **Leer todos los usuarios:** Method: `GET` | URL: `{{base_url}}/users`
+- **Ver un usuario en específico:** Method: `GET` | URL: `{{base_url}}/users/5`
+- **Actualizar nombre de un usuario:** Method: `PUT` | URL: `{{base_url}}/users/5` 
+  *(Body JSON: `{"name": "Nombre Actualizado"}`)*
+- **Borrar un usuario:** Method: `DELETE` | URL: `{{base_url}}/users/5` 
+  *(Te devolverá `"Usuario eliminado correctamente"`).*
+
+¡Listo! Con estas rutas puedes administrar 100% a los usuarios y sus correos desde Bruno.
