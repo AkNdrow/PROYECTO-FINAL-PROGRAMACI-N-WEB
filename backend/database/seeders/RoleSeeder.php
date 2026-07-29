@@ -21,3 +21,5 @@ class RoleSeeder extends Seeder
         foreach ($roles as $role) {
             \App\Models\Role::firstOrCreate(['name' => $role['name']], $role);
         }
+    }
+}

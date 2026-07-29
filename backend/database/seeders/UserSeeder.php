@@ -25,3 +25,5 @@ class UserSeeder extends Seeder
 
         // Crear 14 usuarios comunes (Clientes)
         \App\Models\User::factory(14)->create(['role_id' => 2]);
+    }
+}

@@ -22,3 +22,5 @@ class DocumentSeeder extends Seeder
         foreach ($users as $user) {
             \App\Models\Document::factory(rand(2, 4))->create(['user_id' => $user->id]);
         }
+    }
+}
