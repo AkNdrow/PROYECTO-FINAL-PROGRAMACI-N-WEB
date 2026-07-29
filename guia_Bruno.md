@@ -87,23 +87,20 @@ Actualmente en tu API tienes programado el recurso `apiResource('items')`, el cu
 
 ## 4. ¿Cómo Borrar USUARIOS (Correos de prueba)?
 
-> [!WARNING]
-> En la configuración actual de tu código (`api.php`), **no existe una ruta para borrar usuarios** (`DELETE /api/users/{id}`). Laravel Breeze/Sanctum protege el modelo User fuertemente por defecto.
+> [!TIP]
+> ¡He creado esta ruta para ti! Ya puedes borrar usuarios usando Bruno, pero asegúrate de actualizar el código en tu VPS primero.
 
-Si deseas borrar usuarios usando Bruno, primero debes crear la ruta y el controlador en tu código fuente:
-
-**Paso A: En el código (Laravel)**
-En tu archivo `api.php`, agrega:
-```php
-Route::middleware('auth:sanctum')->delete('/users/{id}', function ($id) {
-    // Nota de seguridad: En el futuro deberías verificar que solo un admin pueda hacer esto.
-    App\Models\User::destroy($id);
-    return response()->json(['message' => 'Usuario eliminado']);
-});
+**Paso A: Actualizar el VPS**
+Entra por SSH a tu VPS y ejecuta:
+```bash
+cd /var/www/html/CleverNote
+git pull origin main
 ```
-Sube los cambios a GitHub y haz `git pull` en el VPS.
+Esto descargará la nueva ruta protegida `DELETE /api/users/{id}` que acabo de programar.
 
-**Paso B: En Bruno (Eliminar el correo)**
-1. Method: `DELETE` | URL: `{{base_url}}/users/5` *(Donde 5 es el ID del usuario)*
+**Paso B: Borrar en Bruno**
+1. Method: `DELETE` | URL: `{{base_url}}/users/5` *(Donde 5 es el ID del usuario. Para saber tu ID, puedes usar el GET de Items y ver el user_id, o simplemente probar números).*
 2. Pestaña **Auth** -> Bearer Token.
-3. **Send**. El usuario de prueba desaparecerá y podrás volver a registrar ese correo desde cero en la aplicación de React.
+3. **Send**. Te devolverá el mensaje `"Usuario eliminado correctamente"`.
+
+¡Listo! El usuario y su correo desaparecerán y podrás volver a intentar registrarlo desde cero en la aplicación de React.
