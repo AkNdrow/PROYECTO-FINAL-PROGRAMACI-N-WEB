@@ -1,31 +1,7 @@
 import React from 'react';
 import './DataTable.css';
 
-const rows = [
-  {
-    id: 1,
-    name: 'Plan de sprint.md',
-    modified: '2026-07-27',
-    category: 'Proyecto',
-    status: 'Listo'
-  },
-  {
-    id: 2,
-    name: 'Resumen ejecutivo.md',
-    modified: '2026-07-25',
-    category: 'Reunión',
-    status: 'Pendiente'
-  },
-  {
-    id: 3,
-    name: 'Notas de diseño.txt',
-    modified: '2026-07-24',
-    category: 'Diseño',
-    status: 'Listo'
-  }
-];
-
-export default function DataTable() {
+export default function DataTable({ documents = [], loading = false }) {
   return (
     <div className="table-card">
       <div className="table-header">
@@ -41,23 +17,35 @@ export default function DataTable() {
       <table className="data-table">
         <thead>
           <tr>
-            <th>Nombre del archivo</th>
-            <th>Fecha de modificación</th>
+            <th>Título del archivo</th>
+            <th>Fecha de creación</th>
             <th>Categoría</th>
-            <th>Acciones</th>
+            <th>Autor</th>
+            <th>Estado</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              <td>{row.name}</td>
-              <td>{row.modified}</td>
-              <td>{row.category}</td>
-              <td>
-                <span className="table-status">{row.status}</span>
-              </td>
+          {loading ? (
+            <tr>
+              <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>Cargando documentos...</td>
             </tr>
-          ))}
+          ) : documents.length === 0 ? (
+            <tr>
+              <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>No se encontraron documentos</td>
+            </tr>
+          ) : (
+            documents.map((row) => (
+              <tr key={row.id}>
+                <td>{row.titulo}</td>
+                <td>{row.fecha_creacion}</td>
+                <td>{row.tipo}</td>
+                <td>{row.autor}</td>
+                <td>
+                  <span className="table-status">{row.estado}</span>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

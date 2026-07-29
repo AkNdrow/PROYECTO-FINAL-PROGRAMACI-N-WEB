@@ -39,11 +39,11 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
       nextErrors.email = 'Correo no válido.';
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!formData.password) {
       nextErrors.password = 'La contraseña es obligatoria.';
     } else if (!passwordRegex.test(formData.password)) {
-      nextErrors.password = 'Mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
+      nextErrors.password = 'La contraseña no cumple con los requisitos de seguridad.';
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -176,10 +176,26 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
                     <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
                     <line x1="2" x2="22" y1="2" y2="22"/>
                   </svg>
-                )}
               </button>
             </div>
-            {errors.password && <span className="error-message">{errors.password}</span>}
+            
+            {/* Validadores visuales en tiempo real */}
+            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ color: formData.password.length >= 8 ? '#4ade80' : '#94a3b8' }}>
+                {formData.password.length >= 8 ? '✓' : '○'} Mínimo 8 caracteres
+              </div>
+              <div style={{ color: /[A-Z]/.test(formData.password) ? '#4ade80' : '#94a3b8' }}>
+                {/[A-Z]/.test(formData.password) ? '✓' : '○'} Al menos 1 mayúscula
+              </div>
+              <div style={{ color: /\d/.test(formData.password) ? '#4ade80' : '#94a3b8' }}>
+                {/\d/.test(formData.password) ? '✓' : '○'} Al menos 1 número
+              </div>
+              <div style={{ color: /[\W_]/.test(formData.password) ? '#4ade80' : '#94a3b8' }}>
+                {/[\W_]/.test(formData.password) ? '✓' : '○'} Al menos 1 carácter especial
+              </div>
+            </div>
+
+            {errors.password && <span className="error-message" style={{ marginTop: '0.5rem' }}>{errors.password}</span>}
           </label>
 
           {/* Campo Confirmar Contraseña */}

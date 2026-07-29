@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-export default function Navbar({ userName = 'Usuario', title = 'CleverNote / Dashboard', onLogout, onProfileSelect, onSettingsSelect }) {
+export default function Navbar({ title = 'CleverNote / Dashboard', onLogout, onProfileSelect, onSettingsSelect }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const userName = user?.nombre || user?.name || 'Usuario';
+  const userRole = user?.rol || user?.role || 'Active';
 
   return (
     <div className="navbar-shell">
@@ -26,7 +30,7 @@ export default function Navbar({ userName = 'Usuario', title = 'CleverNote / Das
             </div>
             <div className="profile-info">
               <span className="profile-name">{userName}</span>
-              <span className="profile-role">Active</span>
+              <span className="profile-role">{userRole}</span>
             </div>
           </button>
 
