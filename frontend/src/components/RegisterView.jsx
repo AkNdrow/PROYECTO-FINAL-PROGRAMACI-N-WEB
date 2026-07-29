@@ -15,6 +15,7 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,14 +86,17 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
         }
 
         // Si fue exitoso (201)
-        alert('¡Cuenta creada con éxito! Se ha enviado un enlace a tu correo. Por favor, revísalo para verificar tu cuenta antes de iniciar sesión.');
-        
+      setSuccessMsg('¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...');
+      
+      setTimeout(() => {
         if (onNavigateToLogin) onNavigateToLogin();
-      } catch (err) {
-        setErrors({ general: err.message });
-      } finally {
-        setLoading(false);
-      }
+      }, 1500);
+
+    } catch (err) {
+      setErrors({ general: err.message });
+    } finally {
+      setLoading(false);
+    }
     }
   };
 
@@ -234,6 +238,9 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
           <button type="submit" className="register-button" disabled={loading} style={{ marginTop: '1rem' }}>
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
+          {successMsg && (
+            <p className="text-green-500 font-medium my-2">{successMsg}</p>
+          )}
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>

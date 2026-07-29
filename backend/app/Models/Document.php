@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory; // 👈 Importar esta línea
 use Illuminate\Database\Eloquent\Model;
 
 class Document extends Model
 {
-    protected $fillable = ['user_id', 'title', 'content', 'type', 'status'];
+    use HasFactory; // 👈 Agregar este trait dentro de la clase
+
+    protected $fillable = [
+        'title',
+        'content',
+        'user_id',
+    ];
 
     public function user()
     {

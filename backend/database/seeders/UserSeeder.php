@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -12,16 +14,18 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear Admin
-        \App\Models\User::firstOrCreate(
+        // Crear usuario Administrador
+        User::firstOrCreate(
             ['email' => 'admin@clevernote.com'],
             [
-                'name' => 'Administrador',
-                'password' => \Illuminate\Support\Facades\Hash::make('AdminClever1!'),
-                'role_id' => 1, // Administrador
+                'name' => 'Admin CleverNote',
+                'password' => Hash::make('Admin123!'),
                 'email_verified_at' => now(),
+                'role_id' => 1,
             ]
         );
 
         // Crear 14 usuarios comunes (Clientes)
-        \App\Models\User::factory(14)->create(['role_id' => 2]);
+        User::factory(14)->create(['role_id' => 2]);
+    }
+}

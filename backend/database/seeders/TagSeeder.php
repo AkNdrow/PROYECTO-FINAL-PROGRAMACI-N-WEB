@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Tag;
+use App\Models\Document;
 
 class TagSeeder extends Seeder
 {
@@ -13,10 +14,10 @@ class TagSeeder extends Seeder
     public function run(): void
     {
         // Crear 15 tags
-        $tags = \App\Models\Tag::factory(15)->create();
+        $tags = Tag::factory(15)->create();
 
         // Obtener todos los documentos
-        $documents = \App\Models\Document::all();
+        $documents = Document::all();
 
         // Asignar entre 1 y 3 tags aleatorias a cada documento
         foreach ($documents as $document) {
@@ -24,3 +25,5 @@ class TagSeeder extends Seeder
                 $tags->random(rand(1, 3))->pluck('id')->toArray()
             );
         }
+    }
+}
