@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
@@ -12,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::select('id', 'name', 'email', 'email_verified_at', 'created_at')->get();
+        return UserResource::collection(User::with('role')->get());
     }
 
     /**
@@ -20,7 +21,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        return User::select('id', 'name', 'email', 'email_verified_at', 'created_at')->findOrFail($id);
+        return new UserResource(User::with('role')->findOrFail($id));
     }
 
     /**
@@ -39,7 +40,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Usuario actualizado correctamente',
-            'user' => $user->only(['id', 'name', 'email'])
+            'user' => new UserResource($user)
         ]);
     }
 

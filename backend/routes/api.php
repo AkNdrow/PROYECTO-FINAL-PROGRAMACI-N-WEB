@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('items', ItemController::class);
+    Route::apiResource('documents', \App\Http\Controllers\DocumentController::class);
 
     // Rutas protegidas solo para el Administrador
     Route::middleware('role:Administrador')->group(function () {
