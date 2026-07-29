@@ -24,3 +24,5 @@ class TagSeeder extends Seeder
                 $tags->random(rand(1, 3))->pluck('id')->toArray()
             );
         }
+    }
+}
