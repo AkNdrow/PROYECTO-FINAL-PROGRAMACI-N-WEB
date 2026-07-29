@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterUserRequest;
+use App\Http\Requests\LoginUserRequest;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -10,28 +13,19 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Registro de usuario nuevo con validación de formato seguro
+     * Registro de usuario nuevo con validación de formato seguro (vía FormRequest)
      */
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/'],
-        ], [
-            'password.regex' => 'La contraseña debe tener al menos 8 caracteres, incluir al menos una letra mayúscula, una minúscula y un número.',
-            'email.unique' => 'El correo electrónico ya se encuentra registrado.',
-            'email.email' => 'El correo electrónico debe ser una dirección válida.',
-        ]);
-
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => 2, // Por defecto al registrarse será "Cliente" (ID 2)
         ]);
 
         // Enviar notificación de verificación por correo
-        event(new \Illuminate\Auth\Events\Registered($user));
+        event(new Registered($user));
 
         return response()->json([
             'message' => 'Usuario registrado exitosamente. Por favor, verifica tu correo electrónico.',
@@ -40,19 +34,10 @@ class AuthController extends Controller
     }
 
     /**
-     * Inicio de sesión con verificación previa de existencia del usuario
+     * Inicio de sesión con verificación de existencia y contraseña
      */
-    public function login(Request $request)
+    public function login(LoginUserRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ], [
-            'email.required' => 'Por favor, ingresa tu correo electrónico.',
-            'email.email' => 'Ingresa un correo electrónico válido.',
-            'password.required' => 'Por favor, ingresa tu contraseña.',
-        ]);
-
         // 1. Detectar primero si el usuario existe
         $user = User::where('email', $request->email)->first();
 
@@ -87,4 +72,3 @@ class AuthController extends Controller
         ]);
     }
 }
-

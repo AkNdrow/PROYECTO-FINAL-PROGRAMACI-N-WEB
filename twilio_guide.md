@@ -24,25 +24,56 @@ Como no tenemos una cuenta comercial de Meta verificada, usaremos el **Twilio Sa
 
 ---
 
-## 2. Plan de Implementación en CleverNote
+## 2. Funcionamiento en CleverNote
 
-En la siguiente etapa de desarrollo, integraremos Twilio en nuestro backend de Laravel de esta manera:
+En CleverNote, Twilio está integrado directamente en la lógica de creación de contenido. He creado una clase dedicada llamada `TwilioService` que se encarga de empaquetar toda la complejidad de comunicarse con la API de Twilio.
 
-### A. Archivo `.env`
-Agregaremos estas variables a tu archivo `.env` del servidor:
-```env
-TWILIO_SID="tu_account_sid_aqui"
-TWILIO_TOKEN="tu_auth_token_aqui"
-TWILIO_FROM_NUMBER="+12345678900"
-TWILIO_WHATSAPP_FROM="whatsapp:+14155238886"
-```
+**La Acción Disparadora:**
+El envío se dispara de forma automática **cuando un usuario crea un nuevo Ítem (o Documento)**. 
+En el `ItemController`, justo después de que el registro se guarda exitosamente en la base de datos MySQL, el controlador "llama" al servicio de Twilio y le ordena despachar dos mensajes simultáneos (uno por SMS clásico y otro por WhatsApp) avisando: *"CleverNote: Se ha creado el nuevo ítem '[Nombre del Ítem]'"*.
 
-### B. Código Backend (Laravel)
-Instalaré la librería oficial de Twilio para PHP (`composer require twilio/sdk`).
-Crearé un servicio o Job en Laravel que se dispare cuando ocurra una acción importante. 
+> [!NOTE]
+> Dado que estás utilizando una cuenta **Trial (de prueba)** de Twilio, existe una restricción impuesta por ellos: **Solo puedes enviar mensajes a números que hayas verificado previamente en tu consola de Twilio** (generalmente tu propio número de celular personal). Por ello, hemos configurado una variable `TWILIO_DESTINATION_PHONE` en tu `.env` que forza al sistema a enviarte todas las notificaciones a tu teléfono, simulando cómo le llegaría a un usuario real en producción.
 
-**¿Qué acción disparará el mensaje? (Propuesta):**
-Cuando el administrador cambie el estado de un documento de un usuario a "Completado" o "Rechazado", el sistema le enviará un WhatsApp y un SMS automático avisándole: 
-*"Hola [Usuario], tu documento [Nombre] ha sido actualizado a estado: Completado. Revisa tu panel."*
+---
 
-*(Podemos ajustar la acción disparadora a lo que prefieras).*
+## 3. ¿Cómo probarlo en el VPS?
+
+Para comprobar que tu VPS está enviando los SMS y WhatsApp correctamente a tu celular, sigue estos pasos:
+
+1. **Asegura la configuración `.env` en tu VPS:**
+   Verifica que dentro de `/var/www/html/CleverNote/backend/.env` tengas las variables de Twilio bien escritas:
+   ```env
+   TWILIO_SID="tu_sid"
+   TWILIO_TOKEN="tu_token"
+   TWILIO_FROM_NUMBER="+18156654511"
+   TWILIO_WHATSAPP_FROM="+14155238886"
+   TWILIO_DESTINATION_PHONE="+529513543364" 
+   ```
+   *(Nota: Asegúrate de que `TWILIO_WHATSAPP_FROM` **NO** contenga la palabra `whatsapp:` antes del número, el sistema la añade sola).*
+
+2. **Aplica los cambios y actualiza el código:**
+   Si no lo has hecho, asegúrate de descargar la última versión del código y de instalar la librería de Twilio en el servidor:
+   ```bash
+   cd /var/www/html/CleverNote
+   git pull origin main
+   
+   cd backend
+   composer install
+   ```
+
+3. **Ejecuta la prueba desde Bruno (Tu PC):**
+   * Abre **Bruno** en tu computadora local.
+   * Selecciona la petición para **Crear un Ítem** (`POST /api/items` o la equivalente que estés usando).
+   * Asegúrate de estar autenticado (pasando el Bearer Token en la pestaña Auth).
+   * En el `Body` (JSON), envía un nuevo ítem, por ejemplo:
+     ```json
+     {
+       "name": "Reporte de Ventas",
+       "description": "Reporte mensual para probar Twilio"
+     }
+     ```
+   * Haz clic en **Send**.
+
+4. **¡Revisa tu Celular!**
+   Al recibir el código `201 Created` en Bruno, tu VPS habrá completado el proceso y en unos segundos tu celular deberá vibrar recibiendo un SMS tradicional y un mensaje de WhatsApp desde el número de Twilio.

@@ -26,4 +26,8 @@ class TagSeeder extends Seeder
             );
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 51aec2169b32c88001655d4f869b94ffa3f06aa9
