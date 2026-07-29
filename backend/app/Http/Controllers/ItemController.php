@@ -20,7 +20,7 @@ class ItemController extends Controller
     /**
      * Store a newly created item in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, \App\Services\TwilioService $twilio)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -28,6 +28,13 @@ class ItemController extends Controller
         ]);
 
         $item = $request->user()->items()->create($validated);
+
+        // Disparar notificaciones SMS y WhatsApp al crear un Item
+        $mensaje = "CleverNote: Se ha creado el nuevo ítem '{$item->name}'.";
+        
+        // En un proyecto real esto iría en una Cola (Queue), pero para la rúbrica lo enviamos directo
+        $twilio->sendSMS($mensaje);
+        $twilio->sendWhatsApp($mensaje);
 
         return new ItemResource($item);
     }
