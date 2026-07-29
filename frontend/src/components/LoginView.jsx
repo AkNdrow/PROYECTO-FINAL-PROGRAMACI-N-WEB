@@ -138,7 +138,7 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
         <div className="login-brand">
           <div className="brand-mark">CN</div>
           <h1>CleverNote</h1>
-          
+
         </div>
 
         {isVerified && (
