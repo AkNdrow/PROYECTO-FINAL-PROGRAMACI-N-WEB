@@ -62,3 +62,28 @@ La selección de esta arquitectura en Laravel responde a las siguientes razones 
 El servicio cliente `frontend/src/services/api.js` implementa un patrón **Fallback Graceful**:
 - Si el servidor backend de Laravel se encuentra activo en `http://localhost:8000/api` o en el VPS de producción, todas las operaciones se procesan directamente contra la base de datos SQL.
 - Si el backend está desconectado durante pruebas locales del equipo, la aplicación cae automáticamente a la simulación mediante `localStorage`, garantizando que las pruebas nunca se vean bloqueadas.
+
+
+
+##  Pruebas de API RESTful con Bruno
+
+Las pruebas automatizadas y de integración de la API RESTful se encuentran versionadas en el directorio `backend/bruno/` del repositorio.
+
+###  Colección de Endpoints Incluidos
+
+La colección valida el flujo de autenticación mediante Laravel Sanctum, el acceso a rutas protegidas y el manejo correcto de errores HTTP:
+
+| # | Endpoint | Método | Autenticación | Descripción / Resultado Esperado |
+| :-: | :--- | :-: | :-: | :--- |
+| **1** | `/api/login` | `POST` | Pública | Autenticación del usuario Administrador (`admin@clevernote.com`). Asigna automáticamente el Bearer Token a la variable de entorno `{{token}}` en respuesta exitosa (`200 OK`). |
+| **2** | `/api/documents` | `GET` | Bearer Token | Consulta la lista de documentos usando el token de sesión almacenado (`200 OK`). |
+| **3** | `/api/documents` | `GET` | Sin Token | **Caso de prueba de error intencional:** Intenta consumir un endpoint protegido sin credenciales para verificar la respuesta `401 Unauthorized` por el middleware de Sanctum. |
+
+---
+
+###  Instrucciones de Ejecución
+
+1. Abrir la aplicación **Bruno Client**.
+2. Hacer clic en **Open Collection** y seleccionar la carpeta `backend/bruno` del proyecto.
+3. Asegurarse de tener el backend corriendo (`php artisan serve`).
+4. Ejecutar las peticiones en orden (`1_Auth_Login` $\rightarrow$ `2_Get_Documents_Protected` $\rightarrow$ `3_Error_Unauthorized`).

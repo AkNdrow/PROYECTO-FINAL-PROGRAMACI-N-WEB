@@ -79,3 +79,42 @@ De acuerdo a la planificación del proyecto (README), la estructura actual deber
 1.  **`documents`**: Reemplazará o expandirá a `items`, almacenando el contenido en Markdown, tipo de formato (MD, LaTeX, TXT) y ruta de acceso.
 2.  **`folders`**: Módulo de almacenes para permitir jerarquía (una carpeta tiene muchos documentos).
 3.  **`tasks`**: Seguimiento de estado de los documentos (Pendiente, Completado).
+
+
+
+##  Documentación de Base de Datos (MySQL)
+
+### 1. Estructura y Parámetros Generales
+* **Motor de Base de Datos:** MySQL (Servidor de producción VPS / Entorno de desarrollo local).
+* **Gestión de Esquema:** Migraciones nativas de Laravel (`backend/database/migrations/`).
+* **Respaldo Físico:** Script SQL completo generado en `backend/database/dump.sql`.
+
+---
+
+### 2. Tablas y Modelo de Datos
+El proyecto implementa las tablas requeridas por el dominio del sistema más la infraestructura de autenticación y cache de Laravel:
+
+* **`users`**: Registro de usuarios, contraseñas hasheadas y referencia de rol (`role_id`).
+* **`roles`**: Definición de niveles de acceso (`admin`, `client`, `editor`).
+* **`documents`**: Almacenamiento de documentos y notas creados en CleverNote.
+* **`tags`**: Catálogo de etiquetas para clasificación de contenido.
+* **`items`**: Módulos complementarios asignados al sistema.
+* **`document_tag` (Tabla Pivote - Relación N:M)**: Implementación de la relación **Muchos a Muchos** entre documentos y etiquetas (un documento puede poseer múltiples etiquetas y una etiqueta puede pertenecer a varios documentos).
+
+---
+
+### 3. Poblado Automático (Seeders y Factories)
+Se configuró `DatabaseSeeder.php` para la regeneración completa de datos de prueba:
+
+* **`RoleSeeder`**: Carga de roles base del sistema.
+* **`UserSeeder`**: Generación de 1 usuario Administrador de evaluación (`admin@clevernote.com`) y 14 usuarios tipo cliente mediante `UserFactory`.
+* **`DocumentSeeder`**: Creación automatizada de 2 a 4 documentos asociados a cada usuario registrado.
+* **`TagSeeder`**: Generación de 15 etiquetas y asignación aleatoria de 1 a 3 etiquetas por documento en la tabla pivote `document_tag`.
+
+---
+
+### 4. Comandos de Despliegue y Mantenimiento
+
+Para reconstruir la base de datos y ejecutar el sembrado de datos de prueba:
+```bash
+php artisan migrate:fresh --seed
