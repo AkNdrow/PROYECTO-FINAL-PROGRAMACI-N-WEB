@@ -1,4 +1,4 @@
-## CleverNote — Sistema de Gestión y Documentación Técnica
+# 📝 CleverNote — Sistema de Gestión y Documentación Técnica
 
 ## Problemática que Resuelve
 Los estudiantes y profesionales técnicos suelen utilizar múltiples herramientas inconexas para escribir, previsualizar y organizar documentos en formatos específicos (Markdown, LaTeX, HTML y TXT). Esto genera desorden en la información y una baja en la productividad al no contar con un entorno centralizado que unifique la autenticación, la gestión, el almacenamiento seguro y la lectura ágil de estos distintos tipos de archivos en una sola plataforma.
@@ -22,7 +22,7 @@ Los estudiantes y profesionales técnicos suelen utilizar múltiples herramienta
 
 ---
 
-##  Credenciales de Prueba (Para Evaluación)
+##  Credenciales de Prueba
 
 Para la revisión de roles y permisos del sistema, se cuentan con los siguientes usuarios precargados en la base de datos:
 
@@ -34,7 +34,7 @@ Para la revisión de roles y permisos del sistema, se cuentan con los siguientes
 
 ---
 
-## 💻 Tecnologías Utilizadas
+##  Tecnologías Utilizadas
 
 * **Backend:** Laravel 11 (API RESTful), Laravel Sanctum (Autenticación por Token).
 * **Frontend:** React + Vite, Axios, Tailwind CSS / React Router DOM.
