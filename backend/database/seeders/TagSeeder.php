@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Tag;
 use App\Models\Document;
+use App\Models\Tag;
+use Illuminate\Database\Seeder;
 
 class TagSeeder extends Seeder
 {
@@ -26,8 +26,4 @@ class TagSeeder extends Seeder
             );
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 51aec2169b32c88001655d4f869b94ffa3f06aa9
