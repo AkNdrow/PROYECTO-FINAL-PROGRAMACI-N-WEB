@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
 
         // 3. Developer / Editor (Rol 3)
         User::create([
-            'name' => 'Developer Prueba',
+            'name' => 'Developer Prueba', 
             'email' => 'dev@clevernote.com',
             'password' => Hash::make('Developer#2026!'),
             'role_id' => 3,
