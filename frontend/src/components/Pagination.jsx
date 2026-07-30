@@ -1,40 +1,46 @@
 import React from 'react';
 import './Pagination.css';
 
-export default function Pagination() {
+export default function Pagination({ currentPage, totalPages, onPageChange }) {
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
+
   return (
     <div className="pagination-wrapper">
       <div className="pagination-controls">
-        <button type="button" className="pagination-button">
+        <button 
+          type="button" 
+          className="pagination-button"
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
+        >
           Anterior
         </button>
 
         <div className="pagination-pages">
-          <button type="button" className="page-button active">
-            1
-          </button>
-          <button type="button" className="page-button">
-            2
-          </button>
-          <button type="button" className="page-button">
-            3
-          </button>
+          {pages.map(page => (
+            <button 
+              key={page}
+              type="button" 
+              className={`page-button ${currentPage === page ? 'active' : ''}`}
+              onClick={() => onPageChange(page)}
+            >
+              {page}
+            </button>
+          ))}
         </div>
 
-        <button type="button" className="pagination-button">
+        <button 
+          type="button" 
+          className="pagination-button"
+          disabled={currentPage === totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
+        >
           Siguiente
         </button>
       </div>
-
-      <label className="pagination-select-wrap">
-        <span>Ver</span>
-        <select className="pagination-select" defaultValue="10">
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-        </select>
-        <span>registros</span>
-      </label>
     </div>
   );
 }

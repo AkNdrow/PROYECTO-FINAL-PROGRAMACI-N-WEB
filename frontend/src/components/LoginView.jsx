@@ -138,7 +138,6 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
         <div className="login-brand">
           <div className="brand-mark">CN</div>
           <h1>CleverNote</h1>
-
         </div>
 
         {isVerified && (
@@ -170,7 +169,6 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
             {errors.general}
           </div>
         )}
-
         <form className="login-form" onSubmit={handleSubmit} noValidate>
           <label className="field">
             <span>Correo electrónico</span>

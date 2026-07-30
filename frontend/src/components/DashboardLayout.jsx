@@ -3,14 +3,12 @@ import './DashboardLayout.css';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import MarkdownEditorView from './MarkdownEditorView';
-import DataTable from './DataTable';
 import AlertMessage from './AlertMessage';
-import Pagination from './Pagination';
-import SearchBar from './SearchBar';
 import LoadingSpinner from './LoadingSpinner';
 import Modal from './Modal';
 import ProfileView from './ProfileView';
 import SettingsView from './SettingsView';
+import DocumentsView from './DocumentsView';
 import { useAuth } from '../context/AuthContext';
 
 function parseMarkdownToHtml(mdText) {
@@ -107,12 +105,10 @@ export default function DashboardLayout({ onLogout, initialSection = 'dashboard'
             <div className="section-header">
               <div>
                 <p className="welcome-eyebrow">Resumen</p>
-                <h2>Entregables completados</h2>
+                <h2>Documentos y Entregables</h2>
               </div>
             </div>
-            <SearchBar />
-            <DataTable />
-            <Pagination />
+            <DocumentsView />
           </section>
         );
       case 'editor':

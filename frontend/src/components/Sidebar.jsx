@@ -1,13 +1,22 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 export default function Sidebar({ activeSection, onSelectSection }) {
+  const { user } = useAuth();
+  const userRole = user?.rol || user?.role || 'Cliente';
+
   const sections = [
     { key: 'dashboard', label: 'Dashboard' },
     { key: 'storage', label: 'Almacenes' },
     { key: 'completed', label: 'Tareas completadas' },
     { key: 'editor', label: 'Abrir Editor' }
   ];
+
+  // Mostrar "Gestión de Usuarios" solo si el rol es Administrador
+  if (userRole === 'Administrador') {
+    sections.push({ key: 'users', label: 'Gestión de Usuarios' });
+  }
 
   return (
     <aside className="sidebar-container">
