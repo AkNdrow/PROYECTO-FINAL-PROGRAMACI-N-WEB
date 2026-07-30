@@ -23,6 +23,37 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
     }
   }, []);
 
+  useEffect(() => {
+    let intervalId;
+    if (errors.email && errors.email.includes('confirmar tu correo') && formData.email) {
+      intervalId = setInterval(async () => {
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000/api' : '/api');
+          const response = await fetch(`${apiUrl}/check-email-verified?email=${encodeURIComponent(formData.email.trim())}`);
+          const data = await response.json();
+          if (data.verified) {
+            clearInterval(intervalId);
+            setErrors({});
+            setAlertData({ type: 'success', message: '¡Tu correo ha sido verificado desde otro dispositivo! Iniciando sesión...' });
+            
+            // Automatically log them in by resubmitting the form
+            setTimeout(() => {
+               // We just call the logic inside handleSubmit directly since we know they are verified now
+               // Let's use a hidden submit button or just call the fetch directly.
+               // Since they already submitted once, we can just click a hidden ref or re-run handleSubmit
+               document.getElementById('hidden-login-submit')?.click();
+            }, 2000);
+          }
+        } catch (e) {
+          // ignore network errors during polling
+        }
+      }, 3000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [errors.email, formData.email]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({
@@ -299,6 +330,9 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
           <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
+          
+          {/* Hidden button for auto-submitting from polling */}
+          <button type="submit" id="hidden-login-submit" style={{ display: 'none' }}></button>
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>

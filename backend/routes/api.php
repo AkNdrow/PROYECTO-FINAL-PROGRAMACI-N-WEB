@@ -10,6 +10,7 @@ use App\Http\Controllers\VerifyEmailController;
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/verify-phone', [AuthController::class, 'verifyPhone'])->name('verify-phone');
+Route::get('/check-email-verified', [AuthController::class, 'checkVerification'])->name('check-email-verified');
 
 // Rutas de Verificación de Correo
 Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])->name('verification.verify');

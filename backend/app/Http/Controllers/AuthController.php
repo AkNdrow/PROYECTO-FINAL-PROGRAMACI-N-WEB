@@ -113,4 +113,19 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
         ]);
     }
+
+    /**
+     * Check if the user has verified their email (used for frontend polling)
+     */
+    public function checkVerification(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json(['verified' => false]);
+        }
+        
+        return response()->json(['verified' => $user->hasVerifiedEmail()]);
+    }
 }
