@@ -167,7 +167,9 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
         <div className="login-brand">
           <div className="brand-mark">CN</div>
           <h1>CleverNote</h1>
+          <p>Organiza tus ideas y documentos de forma simple</p>
         </div>
+        
 
         {alertData && (
           <AlertMessage 
