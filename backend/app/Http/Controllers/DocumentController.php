@@ -14,13 +14,18 @@ class DocumentController extends Controller
      */
     public function index(Request $request)
     {
+        $query = Document::with(['user', 'tags'])->latest();
+
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
         // Administradores ven todo, Clientes solo sus documentos
-        if ($request->user()->role_id == 1) { // 1 = Admin
-            $documents = Document::with(['user', 'tags'])->latest()->get();
-        } else {
-            $documents = $request->user()->documents()->with(['user', 'tags'])->latest()->get();
+        if ($request->user()->role_id != 1) { // 1 = Admin
+            $query->where('user_id', $request->user()->id);
         }
         
+        $documents = $query->paginate(5);
         return DocumentResource::collection($documents);
     }
 
