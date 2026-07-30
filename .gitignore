@@ -69,6 +69,6 @@ backend/database/*.sqlite-journal
 # Manuales y guías privadas
 guia_test.md
 guia_vps.md
-i n d i c a c i o n e s . m d  
+indicaciones.md
 vps_setup.md
 guia_cambios.md
