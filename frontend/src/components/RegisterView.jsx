@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './RegisterView.css';
+import VerifyOtpView from './VerifyOtpView';
 
 export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
   const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [showOtpForm, setShowOtpForm] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +41,12 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
       nextErrors.email = 'El correo es obligatorio.';
     } else if (!emailRegex.test(formData.email.trim())) {
       nextErrors.email = 'Correo no válido.';
+    }
+
+    if (!formData.phone.trim()) {
+      nextErrors.phone = 'El número de teléfono es obligatorio.';
+    } else if (formData.phone.trim().length < 10) {
+      nextErrors.phone = 'El teléfono debe tener al menos 10 caracteres.';
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -67,6 +76,7 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
           body: JSON.stringify({
             name: formData.fullName.trim(),
             email: formData.email.trim(),
+            phone: formData.phone.trim(),
             password: formData.password,
             password_confirmation: formData.confirmPassword,
           }),
@@ -86,19 +96,33 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
         }
 
         // Si fue exitoso (201)
-      setSuccessMsg('¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...');
-      
-      setTimeout(() => {
-        if (onNavigateToLogin) onNavigateToLogin();
-      }, 1500);
-
-    } catch (err) {
-      setErrors({ general: err.message });
-    } finally {
-      setLoading(false);
-    }
+        if (data.requires_phone_verification) {
+          setRegisteredEmail(data.email || formData.email.trim());
+          setShowOtpForm(true);
+        } else {
+          setSuccessMsg('¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...');
+          
+          setTimeout(() => {
+            if (onNavigateToLogin) onNavigateToLogin();
+          }, 1500);
+        }
+      } catch (err) {
+        setErrors({ general: err.message });
+      } finally {
+        setLoading(false);
+      }
     }
   };
+
+  if (showOtpForm) {
+    return (
+      <VerifyOtpView 
+        email={registeredEmail} 
+        onVerified={onNavigateToLogin} 
+        onCancel={() => setShowOtpForm(false)} 
+      />
+    );
+  }
 
   return (
     <div className="register-page">
@@ -133,8 +157,9 @@ export default function RegisterView({ onNavigateToLogin, onRegisterSuccess }) {
           </label>
 
           <label className="field">
-            <span>Número de teléfono (opcional):</span>
+            <span>Número de teléfono:</span>
             <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+52 55 1234 5678" disabled={loading} />
+            {errors.phone && <span className="error-message">{errors.phone}</span>}
           </label>
 
           {/* Campo Contraseña */}
