@@ -1,0 +1,19 @@
+meta {
+  name: 2. Documents - List (Protected)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/documents
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept: application/json
+}
