@@ -4,32 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Role;
-use Illuminate\Support\Facades\Hash;
-
-class UserSeeder extends Seeder
-{
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        // Crear usuario Administrador
-        User::firstOrCreate(
-            ['email' => 'admin@clevernote.com'],
-            [
-                'name' => 'Admin CleverNote',
-                'password' => Hash::make('Admin123!'),
-                'email_verified_at' => now(),
-                'role_id' => 1,
-            ]
-        );
-<?php
-
-namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -59,10 +33,8 @@ class UserSeeder extends Seeder
             'password' => Hash::make('Developer#2026!'),
             'role_id' => 3,
         ]);
-    
 
-        // Crear 14 usuarios comunes (Clientes)
+        // Crear 14 usuarios comunes adicionales (Clientes)
         User::factory(14)->create(['role_id' => 2]);
-        \App\Models\User::factory(14)->create(['role_id' => 2]);
     }
 }
