@@ -1,18 +1,18 @@
-# 📝 CleverNote — Sistema de Gestión y Documentación Técnica
+## CleverNote — Sistema de Gestión y Documentación Técnica
 
-## 🎯 Problemática que Resuelve
+## Problemática que Resuelve
 Los estudiantes y profesionales técnicos suelen utilizar múltiples herramientas inconexas para escribir, previsualizar y organizar documentos en formatos específicos (Markdown, LaTeX, HTML y TXT). Esto genera desorden en la información y una baja en la productividad al no contar con un entorno centralizado que unifique la autenticación, la gestión, el almacenamiento seguro y la lectura ágil de estos distintos tipos de archivos en una sola plataforma.
 
 ---
 
-## 👥 Integrantes del Equipo
+##  Integrantes del Equipo
 
 * **Andrés Cuevas García**
 * **Moisés Pascual Coyolt**
 
 ---
 
-## 🌐 Enlaces del Proyecto
+##  Enlaces del Proyecto
 
 * **Sitio Web Desplegado (VPS / HTTPS):** [https://clevernote.duckdns.org/login]
 * **URL Base de la API REST:** `https://clevernote.duckdns.org/api`
@@ -55,7 +55,7 @@ Para la revisión de roles y permisos del sistema, se cuentan con los siguientes
 
 ---
 
-## Diagrama Entidad-Relación (ER)
+##  Diagrama Entidad-Relación (ER)
 
 ```mermaid
 erDiagram
@@ -110,9 +110,9 @@ erDiagram
         int tag_id PK, FK
     }
 
-    roles ||--o{ users : has
-    users ||--o{ stores : owns
-    users ||--o{ documents : creates
-    stores ||--o{ documents : contains
-    documents ||--o{ document_tag : has
-    tags ||--o{ document_tag : has
+    roles ||--o{ users : "1 a N (posee)"
+    users ||--o{ stores : "1 a N (crea/administra)"
+    users ||--o{ documents : "1 a N (es autor de)"
+    stores ||--o{ documents : "1 a N (agrupa)"
+    documents ||--o{ document_tag : "1 a N (pivote)"
+    tags ||--o{ document_tag : "1 a N (pivote)"
