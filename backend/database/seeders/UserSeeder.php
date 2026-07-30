@@ -16,6 +16,8 @@ class UserSeeder extends Seeder
             'email' => 'admin@clevernote.com',
             'password' => Hash::make('Admin#2026!'),
             'role_id' => 1,
+            'email_verified_at' => now(),
+            'phone_verified_at' => now(),
         ]);
 
         // 2. Cliente / Estándar (Rol 2)
@@ -24,6 +26,8 @@ class UserSeeder extends Seeder
             'email' => 'cliente@clevernote.com',
             'password' => Hash::make('Cliente#2026!'),
             'role_id' => 2,
+            'email_verified_at' => now(),
+            'phone_verified_at' => now(),
         ]);
 
         // 3. Developer / Editor (Rol 3)
@@ -32,6 +36,8 @@ class UserSeeder extends Seeder
             'email' => 'dev@clevernote.com',
             'password' => Hash::make('Developer#2026!'),
             'role_id' => 3,
+            'email_verified_at' => now(),
+            'phone_verified_at' => now(),
         ]);
 
         // Crear 14 usuarios comunes adicionales (Clientes)
