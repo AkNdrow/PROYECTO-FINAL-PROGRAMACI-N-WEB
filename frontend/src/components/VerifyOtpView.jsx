@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import AlertMessage from './AlertMessage';
 
 function VerifyOtpView({ email, onVerified, onCancel }) {
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -36,8 +38,10 @@ function VerifyOtpView({ email, onVerified, onCancel }) {
         throw new Error(data.message || 'Error al verificar el código');
       }
 
-      alert('¡Teléfono verificado con éxito! Ahora puedes iniciar sesión.');
-      if (onVerified) onVerified();
+      setSuccessMsg('¡Teléfono verificado con éxito! Ahora puedes iniciar sesión.');
+      setTimeout(() => {
+        if (onVerified) onVerified();
+      }, 1500);
 
     } catch (err) {
       setError(err.message);
@@ -48,6 +52,7 @@ function VerifyOtpView({ email, onVerified, onCancel }) {
 
   return (
     <div className="register-page">
+      {successMsg && <AlertMessage type="success" message={successMsg} />}
       <div className="register-card" style={{ maxWidth: '400px' }}>
         <div className="register-brand">
           <h1>Verifica tu celular</h1>
@@ -72,6 +77,9 @@ function VerifyOtpView({ email, onVerified, onCancel }) {
               disabled={loading} 
               style={{ textAlign: 'center', letterSpacing: '4px', fontSize: '1.2rem' }}
             />
+            <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#94a3b8', textAlign: 'center' }}>
+              No olvides revisar también tu bandeja de correo para verificar tu email.
+            </p>
           </label>
 
           <button type="submit" className="submit-btn" disabled={loading || otpCode.length !== 6}>

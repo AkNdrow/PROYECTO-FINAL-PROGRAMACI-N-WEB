@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AlertMessage from './AlertMessage';
 import './LoginView.css';
 
 export default function LoginView({ onLogin, onNavigateToRegister }) {
@@ -10,6 +11,8 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [alertData, setAlertData] = useState(null);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -33,6 +36,32 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
         [name]: '',
         general: ''
       });
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!formData.email) return;
+    setResending(true);
+    setAlertData(null);
+    const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000/api' : '/api');
+    try {
+      const response = await fetch(`${apiUrl}/email/verification-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email.trim() }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al reenviar el correo');
+      }
+      setAlertData({ type: 'success', message: '¡Correo reenviado! Por favor revisa tu bandeja de entrada.' });
+    } catch (err) {
+      setAlertData({ type: 'error', message: err.message });
+    } finally {
+      setResending(false);
     }
   };
 
@@ -140,6 +169,14 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
           <h1>CleverNote</h1>
         </div>
 
+        {alertData && (
+          <AlertMessage 
+            type={alertData.type} 
+            message={alertData.message} 
+            onClose={() => setAlertData(null)} 
+          />
+        )}
+
         {isVerified && (
           <div style={{
             background: 'rgba(34, 197, 94, 0.15)',
@@ -181,7 +218,30 @@ export default function LoginView({ onLogin, onNavigateToRegister }) {
               placeholder="tu@correo.com"
               disabled={loading}
             />
-            {errors.email && <span className="error-message">{errors.email}</span>}
+            {errors.email && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.25rem' }}>
+                <span className="error-message">{errors.email}</span>
+                {errors.email.includes('confirmar tu correo') && (
+                  <button 
+                    type="button" 
+                    onClick={handleResendEmail} 
+                    disabled={resending}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#60a5fa',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      textDecoration: 'underline',
+                      textAlign: 'left',
+                      padding: 0
+                    }}
+                  >
+                    {resending ? 'Reenviando...' : 'Reenviar enlace de verificación'}
+                  </button>
+                )}
+              </div>
+            )}
           </label>
 
           <label className="field">
